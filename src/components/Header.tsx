@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { TabId } from './Sidebar';
 import { BackgroundTheme } from './AmbientBackground';
-import { CheckCircle2, Tv, Sparkles, Palette, Check, Menu, Radio, Shield } from 'lucide-react';
+import { CheckCircle2, Tv, Sparkles, Palette, Check, Menu, Radio, Shield, Gamepad2 } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: TabId;
@@ -11,6 +11,8 @@ interface HeaderProps {
   onSelectBackgroundTheme: (theme: BackgroundTheme) => void;
   onOpenBackendDrawer: () => void;
   onToggleMobileSidebar: () => void;
+  onToggleTvRemote?: () => void;
+  isTvRemoteOpen?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,6 +23,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectBackgroundTheme,
   onOpenBackendDrawer,
   onToggleMobileSidebar,
+  onToggleTvRemote,
+  isTvRemoteOpen,
 }) => {
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -144,6 +148,22 @@ export const Header: React.FC<HeaderProps> = ({
           <Menu className="w-4 h-4 text-sky-400" />
           <span className="hidden sm:inline">Menu Backend</span>
         </button>
+
+        {/* Android TV Remote Toggle Button */}
+        {onToggleTvRemote && (
+          <button
+            onClick={onToggleTvRemote}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm transition active:scale-[0.98] ${
+              isTvRemoteOpen
+                ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white border border-sky-400 shadow-sky-500/20'
+                : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80'
+            }`}
+            title="Activer le contrôle par télécommande Android TV"
+          >
+            <Gamepad2 className="w-4 h-4 text-sky-400" />
+            <span className="hidden sm:inline">Télécommande TV</span>
+          </button>
+        )}
 
         {/* Netflix Button */}
         <button

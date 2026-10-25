@@ -21,7 +21,8 @@ import {
   ShieldCheck,
   Link,
   FolderKanban,
-  ListVideo
+  ListVideo,
+  Gamepad2
 } from 'lucide-react';
 
 interface BackendDrawerProps {
@@ -38,6 +39,7 @@ interface BackendDrawerProps {
   isRefreshing: boolean;
   onOpenM3uModal?: () => void;
   onOpenPlaylistModal?: () => void;
+  onToggleTvRemote?: () => void;
 }
 
 export const BackendDrawer: React.FC<BackendDrawerProps> = ({
@@ -54,6 +56,7 @@ export const BackendDrawer: React.FC<BackendDrawerProps> = ({
   isRefreshing,
   onOpenM3uModal,
   onOpenPlaylistModal,
+  onToggleTvRemote,
 }) => {
   if (!isOpen) return null;
 
@@ -362,6 +365,19 @@ export const BackendDrawer: React.FC<BackendDrawerProps> = ({
                 </button>
               )}
             </div>
+
+            {onToggleTvRemote && (
+              <button
+                onClick={() => {
+                  onToggleTvRemote();
+                  onClose();
+                }}
+                className="w-full mt-2 p-2.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/40 text-sky-300 hover:text-white font-semibold flex items-center justify-center gap-2 transition active:scale-[0.98] text-xs"
+              >
+                <Gamepad2 className="w-4 h-4 text-sky-400" />
+                <span>Ouvrir Télécommande Android TV</span>
+              </button>
+            )}
           </div>
         </div>
 

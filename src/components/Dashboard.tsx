@@ -207,8 +207,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {mediaItems.slice(0, 2).map((item) => (
               <div
                 key={item.id}
+                tabIndex={0}
+                role="button"
+                aria-label={`Lire ${item.title}`}
                 onClick={() => onPlayMedia(item)}
-                className="group cursor-pointer rounded-lg overflow-hidden bg-slate-900/80 border border-slate-800 hover:border-sky-500/40 transition relative"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onPlayMedia(item);
+                  }
+                }}
+                className="group tv-focusable cursor-pointer rounded-lg overflow-hidden bg-slate-900/80 border border-slate-800 hover:border-sky-500/40 transition relative"
               >
                 <div className="aspect-video relative overflow-hidden bg-black">
                   <img

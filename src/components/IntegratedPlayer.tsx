@@ -183,6 +183,111 @@ export const IntegratedPlayer: React.FC<IntegratedPlayerProps> = ({
     return () => document.removeEventListener('fullscreenchange', onFsChange);
   }, []);
 
+  // Android TV Remote & Keyboard Controls in Player
+  useEffect(() => {
+    if (!media) return;
+
+    const handleTvKeyDown = (e: KeyboardEvent) => {
+      // Reveal controls on any remote press
+      setShowControls(true);
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+      controlsTimeoutRef.current = setTimeout(() => {
+        if (isPlaying) setShowControls(false);
+      }, 4000);
+
+      const key = e.key;
+
+      // Back / Return -> close player
+      if (key === 'Escape' || key === 'Back' || key === 'BrowserBack' || e.keyCode === 27 || e.keyCode === 4) {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+
+      // Play / Pause
+      if (key === ' ' || key === 'MediaPlayPause' || key === 'Play' || key === 'Pause' || key === 'k' || key === 'K') {
+        e.preventDefault();
+        togglePlay();
+        return;
+      }
+
+      // Seek / D-Pad Left & Right
+      if (key === 'ArrowLeft' || key === 'MediaRewind' || key === 'j') {
+        e.preventDefault();
+        handleSkip(-10);
+        return;
+      }
+      if (key === 'ArrowRight' || key === 'MediaFastForward' || key === 'l') {
+        e.preventDefault();
+        handleSkip(10);
+        return;
+      }
+
+      // Volume / D-Pad Up & Down
+      if (key === 'ArrowUp' || key === '+' || key === '=') {
+        e.preventDefault();
+        if (videoRef.current) {
+          const newVol = Math.min(1, Math.round((videoRef.current.volume + 0.1) * 10) / 10);
+          setVolume(newVol);
+          videoRef.current.volume = newVol;
+          videoRef.current.muted = false;
+          setIsMuted(false);
+        }
+        return;
+      }
+      if (key === 'ArrowDown' || key === '-') {
+        e.preventDefault();
+        if (videoRef.current) {
+          const newVol = Math.max(0, Math.round((videoRef.current.volume - 0.1) * 10) / 10);
+          setVolume(newVol);
+          videoRef.current.volume = newVol;
+          videoRef.current.muted = newVol === 0;
+          setIsMuted(newVol === 0);
+        }
+        return;
+      }
+
+      // Channel Zapping / Next & Prev Track
+      if (key === 'ChannelUp' || key === 'PageUp' || key === 'MediaTrackNext') {
+        e.preventDefault();
+        if (playlistItems.length > 0 && onSelectMedia) {
+          const currentIndex = playlistItems.findIndex((i) => i.id === media.id);
+          const nextIndex = (currentIndex + 1) % playlistItems.length;
+          onSelectMedia(playlistItems[nextIndex]);
+        }
+        return;
+      }
+
+      if (key === 'ChannelDown' || key === 'PageDown' || key === 'MediaTrackPrevious') {
+        e.preventDefault();
+        if (playlistItems.length > 0 && onSelectMedia) {
+          const currentIndex = playlistItems.findIndex((i) => i.id === media.id);
+          const prevIndex = (currentIndex - 1 + playlistItems.length) % playlistItems.length;
+          onSelectMedia(playlistItems[prevIndex]);
+        }
+        return;
+      }
+
+      // Mute toggle
+      if (key === 'm' || key === 'M' || key === 'AudioVolumeMute') {
+        e.preventDefault();
+        toggleMute();
+        return;
+      }
+
+      // Fullscreen toggle
+      if (key === 'f' || key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleTvKeyDown, true);
+    return () => window.removeEventListener('keydown', handleTvKeyDown, true);
+  }, [media, isPlaying, playlistItems, onSelectMedia, onClose]);
+
   if (!media) return null;
 
   // Format time (HH:MM:SS or MM:SS)

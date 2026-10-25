@@ -333,8 +333,17 @@ export const IptvSection: React.FC<IptvSectionProps> = ({
           {filteredItems.map((channel) => (
             <div
               key={channel.id}
+              tabIndex={0}
+              role="button"
+              aria-label={`Regarder la chaîne ${channel.title}`}
               onClick={() => onPlayMedia(channel)}
-              className="glass-card rounded-xl overflow-hidden flex flex-col justify-between group cursor-pointer border border-slate-800/80 hover:border-red-500/40 transition duration-200"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onPlayMedia(channel);
+                }
+              }}
+              className="glass-card tv-focusable rounded-xl overflow-hidden flex flex-col justify-between group cursor-pointer border border-slate-800/80 hover:border-red-500/40 transition duration-200"
             >
               {/* Channel Visual Header */}
               <div className="aspect-[16/9] relative bg-black overflow-hidden">
@@ -420,8 +429,17 @@ export const IptvSection: React.FC<IptvSectionProps> = ({
           {filteredItems.map((movie) => (
             <div
               key={movie.id}
+              tabIndex={0}
+              role="button"
+              aria-label={`Regarder le film ${movie.title}`}
               onClick={() => onPlayMedia(movie)}
-              className="glass-card rounded-xl overflow-hidden flex flex-col justify-between group cursor-pointer border border-slate-800/80 hover:border-sky-500/40 transition duration-200"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onPlayMedia(movie);
+                }
+              }}
+              className="glass-card tv-focusable rounded-xl overflow-hidden flex flex-col justify-between group cursor-pointer border border-slate-800/80 hover:border-sky-500/40 transition duration-200"
             >
               <div className="aspect-[16/9] relative bg-black overflow-hidden">
                 <img
@@ -467,8 +485,17 @@ export const IptvSection: React.FC<IptvSectionProps> = ({
           {filteredItems.map((serie) => (
             <div
               key={serie.id}
+              tabIndex={0}
+              role="button"
+              aria-label={`Regarder la série ${serie.title}`}
               onClick={() => onPlayMedia(serie)}
-              className="glass-card rounded-xl overflow-hidden flex flex-col justify-between group cursor-pointer border border-slate-800/80 hover:border-purple-500/40 transition duration-200"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onPlayMedia(serie);
+                }
+              }}
+              className="glass-card tv-focusable rounded-xl overflow-hidden flex flex-col justify-between group cursor-pointer border border-slate-800/80 hover:border-purple-500/40 transition duration-200"
             >
               <div className="aspect-[16/9] relative bg-black overflow-hidden">
                 <img

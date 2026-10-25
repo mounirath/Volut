@@ -33,6 +33,8 @@ import { AmbientBackground, BackgroundTheme } from './components/AmbientBackgrou
 import { BackendDrawer } from './components/BackendDrawer';
 import { M3uModal } from './components/M3uModal';
 import { PlaylistManagerModal } from './components/PlaylistManagerModal';
+import { AndroidTvRemoteOverlay } from './components/AndroidTvRemoteOverlay';
+import { findNextFocusable, focusTvElement } from './services/androidTvRemote';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
@@ -47,10 +49,21 @@ export const App: React.FC = () => {
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [isBackendDrawerOpen, setIsBackendDrawerOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isTvRemoteOpen, setIsTvRemoteOpen] = useState(true);
+  const [isTvModeActive, setIsTvModeActive] = useState(true);
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
   const [backgroundTheme, setBackgroundTheme] = useState<BackgroundTheme>(() => {
     return (localStorage.getItem('streamvault_bg_theme') as BackgroundTheme) || 'ambient-grid';
   });
+
+  // Sync tv-mode-active CSS class on body
+  useEffect(() => {
+    if (isTvModeActive) {
+      document.body.classList.add('tv-mode-active');
+    } else {
+      document.body.classList.remove('tv-mode-active');
+    }
+  }, [isTvModeActive]);
 
   const showToast = useCallback((message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
@@ -76,6 +89,102 @@ export const App: React.FC = () => {
     };
     showToast(`Arrière-plan configuré : ${names[theme]}`, 'info');
   };
+
+  // Direct Channel Jumping from TV Remote Number Keys
+  const handleDirectChannelJump = useCallback((channelNum: number) => {
+    const matched = mediaItems.find(
+      (m) => m.channelNumber === channelNum
+    );
+
+    if (matched) {
+      setSelectedMedia(matched);
+      showToast(`Télécommande TV : Accès direct à la chaîne #${channelNum} (${matched.title})`, 'success');
+    } else {
+      showToast(`Télécommande TV : Chaîne #${channelNum} non trouvée dans le bouquet.`, 'warning');
+    }
+  }, [mediaItems, showToast]);
+
+  // Global D-Pad Spatial Navigation for Physical Android TV Remote
+  useEffect(() => {
+    const handleGlobalTvKeyDown = (e: KeyboardEvent) => {
+      // If player is open, player handles its own keys
+      if (selectedMedia) return;
+
+      const activeTag = (document.activeElement?.tagName || '').toLowerCase();
+      const isInput = activeTag === 'input' || activeTag === 'textarea';
+
+      // Physical Android TV Back Button (Key 27, 4 or key 'Back' / 'Escape')
+      if (e.key === 'Escape' || e.key === 'Back' || e.keyCode === 4 || e.keyCode === 27) {
+        if (isAddModalOpen) {
+          setIsAddModalOpen(false);
+          return;
+        }
+        if (isM3uModalOpen) {
+          setIsM3uModalOpen(false);
+          return;
+        }
+        if (isPlaylistModalOpen) {
+          setIsPlaylistModalOpen(false);
+          return;
+        }
+        if (isBackendDrawerOpen) {
+          setIsBackendDrawerOpen(false);
+          return;
+        }
+        if (isMobileSidebarOpen) {
+          setIsMobileSidebarOpen(false);
+          return;
+        }
+        if (isNetflixMode) {
+          setIsNetflixMode(false);
+          return;
+        }
+        if (activeTab !== 'dashboard') {
+          setActiveTab('dashboard');
+          return;
+        }
+      }
+
+      // If user is actively typing in text input, don't hijack left/right/up/down
+      if (isInput) return;
+
+      // D-Pad Arrow Keys Navigation
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const next = findNextFocusable(document.activeElement as HTMLElement, 'up');
+        if (next) focusTvElement(next);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = findNextFocusable(document.activeElement as HTMLElement, 'down');
+        if (next) focusTvElement(next);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const next = findNextFocusable(document.activeElement as HTMLElement, 'left');
+        if (next) focusTvElement(next);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const next = findNextFocusable(document.activeElement as HTMLElement, 'right');
+        if (next) focusTvElement(next);
+      } else if (e.key === 'Enter' || e.key === 'Select') {
+        const active = document.activeElement as HTMLElement;
+        if (active && !active.closest('.tv-remote-ignore')) {
+          // let normal click happen or trigger it
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalTvKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalTvKeyDown);
+  }, [
+    selectedMedia,
+    isAddModalOpen,
+    isM3uModalOpen,
+    isPlaylistModalOpen,
+    isBackendDrawerOpen,
+    isMobileSidebarOpen,
+    isNetflixMode,
+    activeTab,
+  ]);
 
   const loadMedia = useCallback(() => {
     const config = getXtremeConfig();
@@ -191,6 +300,38 @@ export const App: React.FC = () => {
           onClose={() => setSelectedMedia(null)}
           onSelectMedia={(item) => setSelectedMedia(item)}
         />
+        <AndroidTvRemoteOverlay
+          isOpen={isTvRemoteOpen}
+          onClose={() => setIsTvRemoteOpen(false)}
+          isTvModeActive={isTvModeActive}
+          onToggleTvMode={() => setIsTvModeActive((prev) => !prev)}
+          onHomePress={() => {
+            setSelectedMedia(null);
+            setIsNetflixMode(false);
+            setActiveTab('dashboard');
+          }}
+          onBackPress={() => {
+            if (selectedMedia) {
+              setSelectedMedia(null);
+            } else {
+              setIsNetflixMode(false);
+            }
+          }}
+          onChannelNext={() => {
+            if (mediaItems.length === 0) return;
+            const idx = selectedMedia ? mediaItems.findIndex((m) => m.id === selectedMedia.id) : -1;
+            const next = mediaItems[(idx + 1) % mediaItems.length];
+            setSelectedMedia(next);
+          }}
+          onChannelPrev={() => {
+            if (mediaItems.length === 0) return;
+            const idx = selectedMedia ? mediaItems.findIndex((m) => m.id === selectedMedia.id) : 0;
+            const prev = mediaItems[(idx - 1 + mediaItems.length) % mediaItems.length];
+            setSelectedMedia(prev);
+          }}
+          onDirectChannelNumber={handleDirectChannelJump}
+          onOpenMenu={() => setIsNetflixMode(false)}
+        />
       </div>
     );
   }
@@ -243,7 +384,7 @@ export const App: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
-        {/* Header with Hamburger Trigger */}
+        {/* Header with Hamburger Trigger & TV Remote Toggle */}
         <Header
           activeTab={activeTab}
           isXcConfigured={xcConfig.isConnected}
@@ -252,6 +393,8 @@ export const App: React.FC = () => {
           onSelectBackgroundTheme={handleSelectBackgroundTheme}
           onOpenBackendDrawer={() => setIsBackendDrawerOpen(true)}
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(true)}
+          onToggleTvRemote={() => setIsTvRemoteOpen((prev) => !prev)}
+          isTvRemoteOpen={isTvRemoteOpen}
         />
 
         {/* Views */}
@@ -346,6 +489,7 @@ export const App: React.FC = () => {
         isRefreshing={isRefreshing}
         onOpenM3uModal={() => setIsM3uModalOpen(true)}
         onOpenPlaylistModal={() => setIsPlaylistModalOpen(true)}
+        onToggleTvRemote={() => setIsTvRemoteOpen((prev) => !prev)}
       />
 
       {/* M3U Playlist Manager Modal */}
@@ -378,6 +522,45 @@ export const App: React.FC = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddMedia}
+      />
+
+      {/* Android TV Remote Control Overlay Simulator */}
+      <AndroidTvRemoteOverlay
+        isOpen={isTvRemoteOpen}
+        onClose={() => setIsTvRemoteOpen(false)}
+        isTvModeActive={isTvModeActive}
+        onToggleTvMode={() => setIsTvModeActive((prev) => !prev)}
+        onHomePress={() => {
+          setSelectedMedia(null);
+          setIsNetflixMode(false);
+          setActiveTab('dashboard');
+        }}
+        onBackPress={() => {
+          if (selectedMedia) {
+            setSelectedMedia(null);
+          } else if (isAddModalOpen || isM3uModalOpen || isPlaylistModalOpen || isBackendDrawerOpen) {
+            setIsAddModalOpen(false);
+            setIsM3uModalOpen(false);
+            setIsPlaylistModalOpen(false);
+            setIsBackendDrawerOpen(false);
+          } else if (activeTab !== 'dashboard') {
+            setActiveTab('dashboard');
+          }
+        }}
+        onChannelNext={() => {
+          if (mediaItems.length === 0) return;
+          const idx = selectedMedia ? mediaItems.findIndex((m) => m.id === selectedMedia.id) : -1;
+          const next = mediaItems[(idx + 1) % mediaItems.length];
+          setSelectedMedia(next);
+        }}
+        onChannelPrev={() => {
+          if (mediaItems.length === 0) return;
+          const idx = selectedMedia ? mediaItems.findIndex((m) => m.id === selectedMedia.id) : 0;
+          const prev = mediaItems[(idx - 1 + mediaItems.length) % mediaItems.length];
+          setSelectedMedia(prev);
+        }}
+        onDirectChannelNumber={handleDirectChannelJump}
+        onOpenMenu={() => setIsBackendDrawerOpen(true)}
       />
     </div>
   );

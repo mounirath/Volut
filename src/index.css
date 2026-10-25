@@ -78,3 +78,29 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* --- ANDROID TV REMOTE CONTROLLER FOCUS STYLES --- */
+.tv-focusable {
+  outline: none;
+  transition: transform 0.16s ease-out, box-shadow 0.16s ease-out, border-color 0.16s ease-out;
+}
+
+.tv-focusable:focus,
+.tv-focusable:focus-visible,
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: none !important;
+  border-color: #38bdf8 !important;
+  transform: scale(1.04) !important;
+  box-shadow: 0 0 0 3px #0ea5e9, 0 8px 30px -4px rgba(14, 165, 233, 0.45) !important;
+  z-index: 40 !important;
+}
+
+/* When in dedicated Android TV mode, highlight active focused card prominently */
+body.tv-mode-active *:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3.5px #38bdf8, 0 12px 35px -5px rgba(56, 189, 248, 0.5) !important;
+  transform: scale(1.04) !important;
+}
+

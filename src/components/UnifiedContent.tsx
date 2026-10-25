@@ -173,7 +173,17 @@ export const UnifiedContent: React.FC<UnifiedContentProps> = ({
         {filteredItems.map((item) => (
           <div
             key={item.id}
-            className="glass-card rounded-xl overflow-hidden flex flex-col justify-between group relative border border-slate-800/80 hover:border-sky-500/40 transition duration-200"
+            tabIndex={0}
+            role="button"
+            aria-label={`Lire ${item.title}`}
+            onClick={() => onPlayMedia(item)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onPlayMedia(item);
+              }
+            }}
+            className="glass-card tv-focusable rounded-xl overflow-hidden flex flex-col justify-between group relative border border-slate-800/80 hover:border-sky-500/40 transition duration-200 cursor-pointer"
           >
             {/* Poster container with aspect-ratio [16/9] matching original */}
             <div className="aspect-[16/9] relative bg-black overflow-hidden">
