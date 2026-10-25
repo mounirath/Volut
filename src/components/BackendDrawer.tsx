@@ -18,7 +18,8 @@ import {
   Moon,
   RefreshCw,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Link
 } from 'lucide-react';
 
 interface BackendDrawerProps {
@@ -33,6 +34,7 @@ interface BackendDrawerProps {
   onOpenNetflix: () => void;
   onRefreshStreams: () => void;
   isRefreshing: boolean;
+  onOpenM3uModal?: () => void;
 }
 
 export const BackendDrawer: React.FC<BackendDrawerProps> = ({
@@ -47,6 +49,7 @@ export const BackendDrawer: React.FC<BackendDrawerProps> = ({
   onOpenNetflix,
   onRefreshStreams,
   isRefreshing,
+  onOpenM3uModal,
 }) => {
   if (!isOpen) return null;
 
@@ -312,6 +315,19 @@ export const BackendDrawer: React.FC<BackendDrawerProps> = ({
                 <span>Config XC</span>
               </button>
             </div>
+
+            {onOpenM3uModal && (
+              <button
+                onClick={() => {
+                  onOpenM3uModal();
+                  onClose();
+                }}
+                className="w-full mt-2 p-2.5 rounded-xl bg-gradient-to-r from-red-600/20 via-sky-600/20 to-purple-600/20 hover:from-red-600/30 hover:to-sky-600/30 border border-sky-500/40 text-white font-semibold flex items-center justify-center gap-2 transition active:scale-[0.98]"
+              >
+                <Link className="w-3.5 h-3.5 text-sky-400" />
+                <span>Gérer les Listes & URLs M3U</span>
+              </button>
+            )}
           </div>
         </div>
 

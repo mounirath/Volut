@@ -338,3 +338,34 @@ export const deleteCustomMediaItem = (id: string) => {
   localStorage.setItem('streamvault_custom_media', JSON.stringify(updated));
   return updated;
 };
+
+// --- M3U URL & PLAYLIST STORAGE ---
+export const getM3uUrl = (): string => {
+  return localStorage.getItem('streamvault_m3u_url') || '';
+};
+
+export const saveM3uUrl = (url: string) => {
+  localStorage.setItem('streamvault_m3u_url', url);
+};
+
+export const clearM3uUrl = () => {
+  localStorage.removeItem('streamvault_m3u_url');
+};
+
+export const getM3uItems = (): MediaItem[] => {
+  const data = localStorage.getItem('streamvault_m3u_items');
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+};
+
+export const saveM3uItems = (items: MediaItem[]) => {
+  localStorage.setItem('streamvault_m3u_items', JSON.stringify(items));
+};
+
+export const clearM3uItems = () => {
+  localStorage.removeItem('streamvault_m3u_items');
+};

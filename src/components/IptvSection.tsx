@@ -15,7 +15,8 @@ import {
   Calendar,
   ShieldCheck,
   ArrowRight,
-  Filter
+  Filter,
+  Link
 } from 'lucide-react';
 
 interface IptvSectionProps {
@@ -26,6 +27,7 @@ interface IptvSectionProps {
   onRefresh: () => void;
   isRefreshing: boolean;
   onLoadDemoConfig: () => void;
+  onOpenM3uModal: () => void;
 }
 
 type IptvTab = 'live' | 'vod' | 'series';
@@ -38,34 +40,41 @@ export const IptvSection: React.FC<IptvSectionProps> = ({
   onRefresh,
   isRefreshing,
   onLoadDemoConfig,
+  onOpenM3uModal,
 }) => {
   const [activeIptvTab, setActiveIptvTab] = useState<IptvTab>('live');
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [qualityFilter, setQualityFilter] = useState<'all' | '4K UHD' | 'FHD 1080p'>('all');
 
-  // Filter only Xtreme Codes items (or Supabase items mapped to IPTV categories)
+  // Filter only Xtreme Codes and M3U items
   const allIptvItems = mediaItems.filter((i) => i.type === 'Xtreme Codes');
 
   const liveItems = allIptvItems.filter((i) => i.category === 'Live');
   const vodItems = allIptvItems.filter((i) => i.category === 'VOD');
   const seriesItems = allIptvItems.filter((i) => i.category === 'Series');
 
-  // Subcategories depending on active tab
-  const getSubcategories = () => {
-    switch (activeIptvTab) {
-      case 'live':
-        return ['all', 'Sport en direct', 'Cinéma & Séries', 'Actualités & Monde', 'Documentaires & Découverte'];
-      case 'vod':
-        return ['all', 'Action & Aventure', 'Science-Fiction', 'Thriller & Espionnage', 'Animation & Famille'];
-      case 'series':
-        return ['all', 'Drame & Pouvoir', 'Cyberpunk & Sci-Fi', 'Action & Militaire'];
-      default:
-        return ['all'];
-    }
-  };
-
   const currentTabItems = activeIptvTab === 'live' ? liveItems : activeIptvTab === 'vod' ? vodItems : seriesItems;
+
+  // Subcategories extracted from M3U playlist groups + defaults
+  const getSubcategories = () => {
+    const defaultSubs =
+      activeIptvTab === 'live'
+        ? ['Sport en direct', 'Cinéma & Séries', 'Actualités & Monde', 'Documentaires & Découverte']
+        : activeIptvTab === 'vod'
+        ? ['Action & Aventure', 'Science-Fiction', 'Thriller & Espionnage', 'Animation & Famille']
+        : ['Drame & Pouvoir', 'Cyberpunk & Sci-Fi', 'Action & Militaire'];
+
+    const dynamicSubs = new Set<string>();
+    currentTabItems.forEach((item) => {
+      if (item.subCategory && item.subCategory !== 'Général') {
+        dynamicSubs.add(item.subCategory);
+      }
+    });
+
+    const combined = Array.from(new Set([...defaultSubs, ...Array.from(dynamicSubs)]));
+    return ['all', ...combined];
+  };
 
   const filteredItems = currentTabItems.filter((item) => {
     // Search query
@@ -135,6 +144,14 @@ export const IptvSection: React.FC<IptvSectionProps> = ({
                 <span>Charger Flux IPTV Démo</span>
               </button>
             )}
+
+            <button
+              onClick={onOpenM3uModal}
+              className="px-3.5 py-2 bg-gradient-to-r from-red-600 to-sky-600 hover:from-red-500 hover:to-sky-500 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md shadow-sky-900/30 active:scale-[0.98]"
+            >
+              <Link className="w-3.5 h-3.5" />
+              <span>Gérer URL & Listes M3U</span>
+            </button>
 
             <button
               onClick={onRefresh}

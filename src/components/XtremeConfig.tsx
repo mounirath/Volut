@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { XtremeConfig } from '../types';
-import { Server, CheckCircle2, AlertCircle, RefreshCw, Key, Shield, HelpCircle, Trash2 } from 'lucide-react';
+import { Server, CheckCircle2, AlertCircle, RefreshCw, Key, Shield, HelpCircle, Trash2, Link } from 'lucide-react';
 
 interface XtremeConfigProps {
   currentConfig: XtremeConfig;
   onSave: (config: { host: string; user: string; pass: string }) => void;
   onClear: () => void;
   onShowToast: (msg: string, type?: 'info' | 'success' | 'error' | 'warning') => void;
+  onOpenM3uModal?: () => void;
 }
 
 export const XtremeConfigView: React.FC<XtremeConfigProps> = ({
@@ -14,6 +15,7 @@ export const XtremeConfigView: React.FC<XtremeConfigProps> = ({
   onSave,
   onClear,
   onShowToast,
+  onOpenM3uModal,
 }) => {
   const [host, setHost] = useState(currentConfig.host);
   const [user, setUser] = useState(currentConfig.user);
@@ -228,6 +230,29 @@ export const XtremeConfigView: React.FC<XtremeConfigProps> = ({
               <span className="text-sky-400">GET</span> /live/{'{user}'}/{'{pass}'}/{'{id}'}.m3u8
             </div>
           </div>
+
+          {/* M3U Plus URL Generator */}
+          {currentConfig.isConnected && (
+            <div className="p-3.5 rounded-xl bg-slate-900 border border-sky-500/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <Link className="w-3.5 h-3.5 text-sky-400" />
+                  <span>URL M3U_PLUS Générée</span>
+                </span>
+                {onOpenM3uModal && (
+                  <button
+                    onClick={onOpenM3uModal}
+                    className="text-[10px] text-sky-400 hover:underline font-semibold"
+                  >
+                    Gérer Playlist
+                  </button>
+                )}
+              </div>
+              <p className="text-[10px] text-slate-400 font-mono break-all p-2 rounded bg-slate-950 border border-slate-800 select-all">
+                {currentConfig.host.replace(/\/+$/, '')}/get.php?username={encodeURIComponent(currentConfig.user)}&password={encodeURIComponent(currentConfig.pass)}&type=m3u_plus&output=m3u8
+              </p>
+            </div>
+          )}
 
           <div className="p-3 rounded-xl bg-sky-950/30 border border-sky-500/20 text-[11px] text-sky-300 flex items-start gap-2">
             <HelpCircle className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />

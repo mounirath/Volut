@@ -11,6 +11,7 @@ import {
   getCustomMedia,
   saveCustomMediaItem,
   deleteCustomMediaItem,
+  getM3uItems,
 } from './services/storage';
 import { Sidebar, TabId } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -25,6 +26,7 @@ import { AddMediaModal } from './components/AddMediaModal';
 import { ToastContainer } from './components/ToastContainer';
 import { AmbientBackground, BackgroundTheme } from './components/AmbientBackground';
 import { BackendDrawer } from './components/BackendDrawer';
+import { M3uModal } from './components/M3uModal';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
@@ -35,6 +37,7 @@ export const App: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isM3uModalOpen, setIsM3uModalOpen] = useState(false);
   const [isBackendDrawerOpen, setIsBackendDrawerOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
@@ -70,8 +73,9 @@ export const App: React.FC = () => {
   const loadMedia = useCallback(() => {
     const config = getXtremeConfig();
     const custom = getCustomMedia();
+    const m3uItems = getM3uItems();
 
-    let items: MediaItem[] = [...custom, ...INITIAL_SUPABASE_ITEMS];
+    let items: MediaItem[] = [...custom, ...m3uItems, ...INITIAL_SUPABASE_ITEMS];
 
     if (config.isConnected) {
       items = [...items, ...INITIAL_XTREME_ITEMS];
@@ -86,12 +90,12 @@ export const App: React.FC = () => {
 
   const handleRefreshFlux = () => {
     setIsRefreshing(true);
-    showToast("Synchronisation des flux Supabase et Xtreme Codes...", "info");
+    showToast("Synchronisation des flux Supabase, M3U et Xtreme Codes...", "info");
 
     setTimeout(() => {
       loadMedia();
       setIsRefreshing(false);
-      showToast("Catalogue et flux IPTV actualisés avec succès !", "success");
+      showToast("Catalogue et listes M3U actualisés avec succès !", "success");
     }, 600);
   };
 
@@ -234,6 +238,7 @@ export const App: React.FC = () => {
               onRefresh={handleRefreshFlux}
               isRefreshing={isRefreshing}
               onLoadDemoConfig={handleLoadDemoIptv}
+              onOpenM3uModal={() => setIsM3uModalOpen(true)}
             />
           )}
 
@@ -254,6 +259,7 @@ export const App: React.FC = () => {
               onSave={handleSaveXtreme}
               onClear={handleClearXtreme}
               onShowToast={showToast}
+              onOpenM3uModal={() => setIsM3uModalOpen(true)}
             />
           )}
 
@@ -283,6 +289,16 @@ export const App: React.FC = () => {
         onOpenNetflix={() => setIsNetflixMode(true)}
         onRefreshStreams={handleRefreshFlux}
         isRefreshing={isRefreshing}
+        onOpenM3uModal={() => setIsM3uModalOpen(true)}
+      />
+
+      {/* M3U Playlist Manager Modal */}
+      <M3uModal
+        isOpen={isM3uModalOpen}
+        onClose={() => setIsM3uModalOpen(false)}
+        xtremeConfig={xcConfig}
+        onImportSuccess={() => loadMedia()}
+        onShowToast={showToast}
       />
 
       {/* Video Player Modal */}
