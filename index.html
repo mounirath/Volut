@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StreamVault — Admin Panel & Companion Player</title>
+  <title>StreamVault — Unified Supabase & Xtreme Codes Platform</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,35 +17,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- HLS.js CDN for Live Stream Testing -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <!-- Chart.js CDN for Analytics -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
           colors: {
             skybrand: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              200: '#bae6fd',
-              300: '#7dd3fc',
-              400: '#38bdf8',
-              500: '#0ea5e9',
-              600: '#0284c7',
-              700: '#0369a1',
-              800: '#075985',
-              900: '#0c4a6e',
+              500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 900: '#0c4a6e', 950: '#082f49'
             },
-            glass: {
-              card: 'rgba(15, 23, 42, 0.75)',
-              border: 'rgba(56, 189, 248, 0.15)',
-              hover: 'rgba(30, 41, 59, 0.85)'
-            }
+            netflix: { red: '#E50914', dark: '#141414' }
           }
         }
       }
@@ -53,599 +36,131 @@
   </script>
 
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #0b0f19;
-      background-image: 
-        radial-gradient(ellipse at 10% 10%, rgba(14, 165, 233, 0.12) 0%, transparent 40%),
-        radial-gradient(ellipse at 90% 85%, rgba(56, 189, 248, 0.08) 0%, transparent 50%);
-      background-attachment: fixed;
-    }
-
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.72);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(56, 189, 248, 0.18);
-    }
-
-    .glass-card {
-      background: rgba(30, 41, 59, 0.5);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .glass-card:hover {
-      border-color: rgba(56, 189, 248, 0.35);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.15);
-    }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #090d16;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1e293b;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #0ea5e9;
-    }
-
-    .pulse-glow {
-      box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
-    }
+    body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; }
+    .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(56, 189, 248, 0.15); }
+    .glass-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s; }
+    .glass-card:hover { border-color: rgba(56, 189, 248, 0.4); transform: translateY(-2px); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #090d16; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
   </style>
 </head>
-<body class="h-full flex flex-col text-slate-100 overflow-hidden antialiased">
+<body class="h-full flex flex-col overflow-hidden antialiased">
 
-  <!-- Toast Notification Container -->
+  <!-- Toast Container -->
   <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-3 pointer-events-none max-w-sm w-full"></div>
 
-  <!-- App Wrapper -->
   <div class="flex h-screen overflow-hidden">
 
     <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="w-64 glass-panel border-r border-skybrand-500/20 flex flex-col justify-between shrink-0 transition-all duration-300 z-30 absolute md:relative -translate-x-full md:translate-x-0 h-full">
+    <aside class="w-64 glass-panel border-r border-sky-500/20 flex flex-col justify-between shrink-0 z-30">
       <div class="p-5 flex flex-col h-full overflow-y-auto">
-        <!-- Brand Logo Header -->
-        <div class="flex items-center justify-between pb-6 border-b border-slate-800/80 mb-6">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-skybrand-600 via-skybrand-500 to-skybrand-300 flex items-center justify-center text-white shadow-lg shadow-skybrand-500/30">
-              <i class="fa-solid fa-play text-lg"></i>
-            </div>
-            <div>
-              <h1 class="font-extrabold text-lg tracking-tight text-white flex items-center gap-1.5">
-                Stream<span class="text-skybrand-400">Vault</span>
-              </h1>
-              <p class="text-[10px] text-skybrand-300/70 font-semibold tracking-wider uppercase">Admin & Player</p>
-            </div>
+        <!-- Logo -->
+        <div class="flex items-center gap-3 pb-6 border-b border-slate-800 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-lg">
+            <i class="fa-solid fa-play text-lg"></i>
           </div>
-          <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
-            <i class="fa-solid fa-xmark text-lg"></i>
-          </button>
+          <div>
+            <h1 class="font-extrabold text-base tracking-tight text-white">Stream<span class="text-sky-400">Vault</span></h1>
+            <p class="text-[10px] text-sky-300 font-semibold tracking-wider uppercase">Supabase & Xtreme</p>
+          </div>
         </div>
 
-        <!-- Navigation Menu -->
-        <nav class="space-y-1.5 flex-1">
-          <p class="px-3 text-[10px] font-bold text-skybrand-400/80 uppercase tracking-widest mb-2">Management</p>
-          
-          <button onclick="switchTab('dashboard')" data-nav="dashboard" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition bg-skybrand-500/20 text-skybrand-300 border border-skybrand-400/30">
-            <i class="fa-solid fa-chart-line w-4 text-center text-skybrand-400"></i>
-            <span>Dashboard</span>
+        <!-- Navigation Links -->
+        <nav class="space-y-1.5 flex-1 text-xs">
+          <button onclick="switchTab('dashboard')" data-nav="dashboard" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium transition bg-sky-500/20 text-sky-300 border border-sky-400/30">
+            <i class="fa-solid fa-chart-line w-4 text-sky-400"></i> Dashboard Supabase
           </button>
-
-          <button onclick="switchTab('channels')" data-nav="channels" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
-            <i class="fa-solid fa-tv w-4 text-center text-skybrand-400"></i>
-            <span>Live TV Channels</span>
-            <span id="nav-count-channels" class="ml-auto bg-slate-800 text-skybrand-400 text-[10px] px-2 py-0.5 rounded-full font-mono">0</span>
+          <button onclick="switchTab('unified-content')" data-nav="unified-content" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+            <i class="fa-solid fa-photo-film w-4 text-sky-400"></i> Contenu Unifié (Supabase + Xtreme)
           </button>
-
-          <button onclick="switchTab('movies')" data-nav="movies" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
-            <i class="fa-solid fa-film w-4 text-center text-skybrand-400"></i>
-            <span>Movies Vault</span>
-            <span id="nav-count-movies" class="ml-auto bg-slate-800 text-skybrand-400 text-[10px] px-2 py-0.5 rounded-full font-mono">0</span>
-          </button>
-
-          <button onclick="switchTab('anime')" data-nav="anime" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
-            <i class="fa-solid fa-hat-wizard w-4 text-center text-skybrand-400"></i>
-            <span>Series & Anime</span>
-            <span id="nav-count-anime" class="ml-auto bg-slate-800 text-skybrand-400 text-[10px] px-2 py-0.5 rounded-full font-mono">0</span>
-          </button>
-
-          <button onclick="switchTab('categories')" data-nav="categories" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
-            <i class="fa-solid fa-layer-group w-4 text-center text-skybrand-400"></i>
-            <span>Categories</span>
-          </button>
-
-          <p class="px-3 text-[10px] font-bold text-skybrand-400/80 uppercase tracking-widest mt-6 mb-2">Monetization & Tools</p>
-
-          <button onclick="switchTab('ads')" data-nav="ads" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
-            <i class="fa-solid fa-rectangle-ad w-4 text-center text-skybrand-400"></i>
-            <span>Ad Networks</span>
-          </button>
-
-          <button onclick="switchTab('player')" data-nav="player" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
-            <i class="fa-solid fa-circle-play w-4 text-center text-skybrand-400"></i>
-            <span>Player Testbed</span>
-          </button>
-
-          <button onclick="switchTab('api')" data-nav="api" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
-            <i class="fa-solid fa-database w-4 text-center text-skybrand-400"></i>
-            <span>Supabase API Explorer</span>
-          </button>
-
-          <button onclick="switchTab('settings')" data-nav="settings" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
-            <i class="fa-solid fa-sliders w-4 text-center text-skybrand-400"></i>
-            <span>App Settings</span>
+          <button onclick="switchTab('xtreme-config')" data-nav="xtreme-config" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">
+            <i class="fa-solid fa-server w-4 text-sky-400"></i> Config Xtreme Codes
           </button>
         </nav>
 
-        <!-- Sidebar Supabase Status Footer -->
-        <div class="pt-4 border-t border-slate-800/80 mt-auto space-y-2">
-          <!-- BOUTON DE RETOUR VERS L'INTERFACE NETFLIX -->
-          <a href="streamvault_netflix_all_in_one.html" class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-netflix-red hover:bg-red-600 text-white font-bold text-xs transition shadow-lg">
-            <i class="fa-solid fa-tv text-xs"></i> Mode Netflix / Site
+        <!-- Footer / Switch to Netflix -->
+        <div class="pt-4 border-t border-slate-800 mt-auto">
+          <a href="streamvault_netflix_all_in_one.html" target="_blank" class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-netflix-red hover:bg-red-700 text-white font-bold text-xs transition shadow-lg">
+            <i class="fa-solid fa-tv text-xs"></i> Ouvrir Mode Netflix
           </a>
-
-          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col gap-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400 text-[11px] font-medium">Supabase Backend</span>
-              <span id="sb-status-badge" class="flex items-center gap-1.5 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Connected
-              </span>
-            </div>
-            <p id="sb-url-display" class="font-mono text-[10px] text-slate-500 truncate">blqrcphbduxletcmexdz.supabase.co</p>
-          </div>
         </div>
       </div>
     </aside>
 
-    <!-- Main Workspace Area -->
+    <!-- Main Content -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-      
-      <!-- Topbar Header -->
-      <header class="h-16 border-b border-skybrand-500/20 glass-panel px-6 flex items-center justify-between shrink-0 z-20">
-        <div class="flex items-center gap-4">
-          <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-2">
-            <i class="fa-solid fa-bars text-lg"></i>
-          </button>
-          
-          <!-- Search Bar -->
-          <div class="relative w-64 md:w-80">
-            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-            <input type="text" id="global-search" oninput="handleGlobalSearch(this.value)" placeholder="Search channels, movies, anime..." class="w-full bg-slate-900/90 border border-slate-800/90 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-skybrand-500 focus:ring-1 focus:ring-skybrand-500 transition">
-            
-            <!-- Global Search Suggestions Dropdown -->
-            <div id="search-results" class="hidden absolute left-0 right-0 top-11 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl overflow-hidden z-50 max-h-80 overflow-y-auto"></div>
-          </div>
-        </div>
-
-        <!-- Top Right Actions -->
-        <div class="flex items-center gap-3">
-          <!-- Quick Add Button -->
-          <button onclick="openQuickAddModal()" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-skybrand-600 to-skybrand-500 text-white text-xs font-semibold hover:from-skybrand-500 hover:to-skybrand-400 transition shadow-md shadow-skybrand-500/20">
-            <i class="fa-solid fa-plus text-xs"></i>
-            <span>Quick Create</span>
-          </button>
-
-          <!-- System Notifications -->
-          <button onclick="toggleNotificationsModal()" class="relative p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 rounded-xl transition">
-            <i class="fa-regular fa-bell text-base"></i>
-            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-skybrand-400 animate-ping"></span>
-            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-skybrand-400"></span>
-          </button>
-
-          <div class="h-5 w-px bg-slate-800 mx-1"></div>
-
-          <!-- Admin Profile Badge -->
-          <div class="flex items-center gap-2.5 pl-1">
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-skybrand-700 to-indigo-600 flex items-center justify-center font-bold text-xs text-white border border-skybrand-400/30">
-              AD
-            </div>
-            <div class="hidden lg:block text-left">
-              <p class="text-xs font-semibold text-slate-200 leading-none">Admin Controller</p>
-              <p class="text-[10px] text-skybrand-400 font-medium">Super Admin</p>
-            </div>
-          </div>
-        </div>
+      <header class="h-16 border-b border-sky-500/20 glass-panel px-6 flex items-center justify-between shrink-0">
+        <h2 id="page-title" class="text-sm font-bold text-white">Tableau de Bord & Backend Unifié</h2>
+        <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Supabase & Xtreme Connectés</span>
       </header>
 
-      <!-- Main Workspace Scrollable Body -->
-      <main class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+      <main class="flex-1 overflow-y-auto p-6 space-y-6">
 
-        <!-- TAB 1: DASHBOARD OVERVIEW -->
+        <!-- TAB 1: DASHBOARD -->
         <div id="tab-dashboard" class="tab-content space-y-6">
-          
-          <div class="glass-card rounded-2xl p-6 relative overflow-hidden bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-skybrand-950/40 border border-skybrand-500/20">
-            <div class="max-w-2xl relative z-10">
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-skybrand-500/20 text-skybrand-300 border border-skybrand-400/30 mb-3 inline-block">Platform Operating Normal</span>
-              <h2 class="text-2xl font-extrabold text-white tracking-tight">StreamVault Media Dashboard</h2>
-              <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">Centralized management suite for live IPTV feeds, VOD movies, anime series, and ad telemetry connected directly to your Supabase backend node.</p>
+          <div class="glass-card rounded-2xl p-6 bg-gradient-to-r from-slate-900 to-sky-950/40 border border-sky-500/20 space-y-2">
+            <h3 class="text-xl font-extrabold text-white">Plateforme Hybride StreamVault</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">Cette interface combine le backend Supabase (stockage cloud de vos métadonnées) et les flux Xtreme Codes (Live TV, VOD, Séries de votre fournisseur IPTV).</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="glass-card rounded-xl p-4">
+              <span class="text-xs text-slate-400">Statut Supabase</span>
+              <p class="text-lg font-bold text-emerald-400 mt-1">Connecté (Backend actif)</p>
             </div>
-            <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-15 hidden lg:block text-skybrand-400">
-              <i class="fa-solid fa-tower-broadcast text-9xl"></i>
+            <div class="glass-card rounded-xl p-4">
+              <span class="text-xs text-slate-400">Statut Xtreme Codes</span>
+              <p id="dash-xc-status" class="text-lg font-bold text-amber-400 mt-1">Non configuré</p>
+            </div>
+            <div class="glass-card rounded-xl p-4">
+              <span class="text-xs text-slate-400">Total Médias Affichés</span>
+              <p id="dash-total-media" class="text-lg font-bold text-white mt-1">Chargement...</p>
             </div>
           </div>
+        </div>
 
-          <!-- Stat Cards Grid -->
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
-            <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
-                <span>TV Channels</span>
-                <i class="fa-solid fa-tv text-skybrand-400"></i>
-              </div>
-              <p id="stat-channels-count" class="text-2xl font-bold text-white tracking-tight">0</p>
-              <span class="text-[10px] text-emerald-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Live Streams</span>
+        <!-- TAB 2: UNIFIED CONTENT (Supabase + Xtreme Codes) -->
+        <div id="tab-unified-content" class="tab-content hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-bold text-white">Catalogue Unifié</h3>
+              <p class="text-xs text-slate-400">Affichage combiné des données Supabase et des chaînes/VOD Xtreme Codes.</p>
             </div>
-
-            <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
-                <span>Movies Vault</span>
-                <i class="fa-solid fa-film text-skybrand-400"></i>
-              </div>
-              <p id="stat-movies-count" class="text-2xl font-bold text-white tracking-tight">0</p>
-              <span class="text-[10px] text-skybrand-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-clapperboard"></i> Full HD Movies</span>
-            </div>
-
-            <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
-                <span>Anime & Series</span>
-                <i class="fa-solid fa-hat-wizard text-skybrand-400"></i>
-              </div>
-              <p id="stat-anime-count" class="text-2xl font-bold text-white tracking-tight">0</p>
-              <span class="text-[10px] text-indigo-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-play"></i> Episodes Linked</span>
-            </div>
-
-            <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
-                <span>Active Users</span>
-                <i class="fa-solid fa-users text-emerald-400"></i>
-              </div>
-              <p class="text-2xl font-bold text-white tracking-tight">14,280</p>
-              <span class="text-[10px] text-emerald-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> +18% peak</span>
-            </div>
-
-            <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
-                <span>Bandwidth</span>
-                <i class="fa-solid fa-network-wired text-amber-400"></i>
-              </div>
-              <p class="text-2xl font-bold text-white tracking-tight">3.4 Gbps</p>
-              <span class="text-[10px] text-amber-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-bolt"></i> CDN Edge Peak</span>
-            </div>
-
-            <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
-                <span>Ad Revenue</span>
-                <i class="fa-solid fa-sack-dollar text-emerald-400"></i>
-              </div>
-              <p class="text-2xl font-bold text-white tracking-tight">$1,840</p>
-              <span class="text-[10px] text-emerald-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> This month</span>
-            </div>
+            <button onclick="loadUnifiedContent()" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-semibold transition">
+              <i class="fa-solid fa-rotate mr-1"></i> Rafraîchir les flux
+            </button>
           </div>
 
-          <!-- Charts & Analytics Row -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 glass-card rounded-2xl p-5 flex flex-col">
-              <div class="flex items-center justify-between mb-4">
+          <div id="unified-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <!-- Rempli dynamiquement -->
+          </div>
+        </div>
+
+        <!-- TAB 3: XTREME CODES CONFIG -->
+        <div id="tab-xtreme-config" class="tab-content hidden space-y-6">
+          <div class="glass-card rounded-2xl p-6 max-w-xl space-y-4">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-server text-sky-400"></i> Configuration Xtreme Codes API
+            </h3>
+            <div class="space-y-3 text-xs">
+              <div>
+                <label class="block text-slate-400 mb-1">Host / URL Serveur IPTV</label>
+                <input type="text" id="xc-host" placeholder="http://line.provider.com:8080" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono">
+              </div>
+              <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-chart-area text-skybrand-400"></i> Live Network Throughput & Concurrent Playback
-                  </h3>
-                  <p class="text-[11px] text-slate-400">Real-time edge server telemetry (Gbps vs Active Streams)</p>
+                  <label class="block text-slate-400 mb-1">Username</label>
+                  <input type="text" id="xc-user" placeholder="Utilisateur" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono">
                 </div>
-                <span class="px-2 py-1 rounded bg-skybrand-500/10 text-skybrand-400 text-[10px] font-mono border border-skybrand-500/20">Live Sync</span>
-              </div>
-              <div class="h-64 w-full">
-                <canvas id="bandwidthChart"></canvas>
-              </div>
-            </div>
-
-            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
-              <div>
-                <h3 class="text-sm font-bold text-white mb-1 flex items-center gap-2">
-                  <i class="fa-solid fa-pie-chart text-skybrand-400"></i> Media Distribution
-                </h3>
-                <p class="text-[11px] text-slate-400 mb-4">Category breakdown across active database assets</p>
-                <div class="h-48 w-full relative flex items-center justify-center">
-                  <canvas id="distributionChart"></canvas>
-                </div>
-              </div>
-              <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-                <span>Categories active: <strong id="dash-cat-count" class="text-slate-200">8</strong></span>
-                <button onclick="switchTab('categories')" class="text-skybrand-400 hover:underline">Manage Categories</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recent Media Table -->
-          <div class="glass-card rounded-2xl p-5 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                  <i class="fa-solid fa-list-ul text-skybrand-400"></i> Recent Platform Additions
-                </h3>
-                <p class="text-[11px] text-slate-400">Latest media entries registered across Live TV, Movies, and Anime</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <button onclick="openQuickAddModal()" class="px-3 py-1.5 rounded-lg bg-skybrand-600/30 hover:bg-skybrand-600/50 text-skybrand-300 text-xs font-medium border border-skybrand-500/30 transition">
-                  + Add Media Entry
-                </button>
-              </div>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-800">
-                  <tr>
-                    <th class="py-3 px-4">Title / Name</th>
-                    <th class="py-3 px-4">Type</th>
-                    <th class="py-3 px-4">Category</th>
-                    <th class="py-3 px-4">Stream Status</th>
-                    <th class="py-3 px-4 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody id="dash-recent-table" class="divide-y divide-slate-800/60"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 2: LIVE TV CHANNELS -->
-        <div id="tab-channels" class="tab-content hidden space-y-5">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 class="text-xl font-bold text-white tracking-tight">Live TV Channels Manager</h2>
-              <p class="text-xs text-slate-400 mt-0.5">Manage M3U/HLS IPTV stream feeds, channel logos, and streaming health</p>
-            </div>
-            <button onclick="openChannelModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-skybrand-600 to-skybrand-500 text-white text-xs font-semibold hover:from-skybrand-500 hover:to-skybrand-400 transition flex items-center gap-2 shadow-lg shadow-skybrand-500/20">
-              <i class="fa-solid fa-plus"></i> Add TV Channel
-            </button>
-          </div>
-
-          <div class="glass-card rounded-2xl overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-800">
-                  <tr>
-                    <th class="py-3.5 px-4">Channel Logo & Name</th>
-                    <th class="py-3.5 px-4">Category</th>
-                    <th class="py-3.5 px-4">M3U / HLS Stream Link</th>
-                    <th class="py-3.5 px-4">Status</th>
-                    <th class="py-3.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="channels-list-body" class="divide-y divide-slate-800/60"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 3: MOVIES -->
-        <div id="tab-movies" class="tab-content hidden space-y-5">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 class="text-xl font-bold text-white tracking-tight">Movies Vault</h2>
-              <p class="text-xs text-slate-400 mt-0.5">Manage full-length movie titles, posters, release years, and playback sources</p>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="flex bg-slate-900/90 rounded-xl p-1 border border-slate-800">
-                <button onclick="setMovieView('grid')" id="btn-movie-grid" class="px-2.5 py-1 rounded-lg text-xs font-medium text-skybrand-400 bg-skybrand-500/20"><i class="fa-solid fa-grid-2"></i> Grid</button>
-                <button onclick="setMovieView('table')" id="btn-movie-table" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200"><i class="fa-solid fa-list"></i> Table</button>
-              </div>
-              <button onclick="openMovieModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-skybrand-600 to-skybrand-500 text-white text-xs font-semibold hover:from-skybrand-500 hover:to-skybrand-400 transition flex items-center gap-2 shadow-lg shadow-skybrand-500/20">
-                <i class="fa-solid fa-plus"></i> Add Movie
-              </button>
-            </div>
-          </div>
-
-          <div id="movies-grid-view" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-
-          <div id="movies-table-view" class="glass-card rounded-2xl overflow-hidden hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-800">
-                  <tr>
-                    <th class="py-3.5 px-4">Poster & Movie Title</th>
-                    <th class="py-3.5 px-4">Category</th>
-                    <th class="py-3.5 px-4">Release Year</th>
-                    <th class="py-3.5 px-4">Video Stream URL</th>
-                    <th class="py-3.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="movies-list-body" class="divide-y divide-slate-800/60"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 4: ANIME -->
-        <div id="tab-anime" class="tab-content hidden space-y-5">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 class="text-xl font-bold text-white tracking-tight">Series & Anime Directory</h2>
-              <p class="text-xs text-slate-400 mt-0.5">Manage episodic anime series, titles, seasons, and individual episode streams</p>
-            </div>
-            <button onclick="openAnimeModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-skybrand-600 to-skybrand-500 text-white text-xs font-semibold hover:from-skybrand-500 hover:to-skybrand-400 transition flex items-center gap-2 shadow-lg shadow-skybrand-500/20">
-              <i class="fa-solid fa-plus"></i> Add Anime Series
-            </button>
-          </div>
-          <div id="anime-grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </div>
-
-        <!-- TAB 5: CATEGORIES -->
-        <div id="tab-categories" class="tab-content hidden space-y-5">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 class="text-xl font-bold text-white tracking-tight">Media Categories</h2>
-              <p class="text-xs text-slate-400 mt-0.5">Organize content under taxonomies for Live TV, Movies, and Anime</p>
-            </div>
-            <button onclick="openCategoryModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-skybrand-600 to-skybrand-500 text-white text-xs font-semibold hover:from-skybrand-500 hover:to-skybrand-400 transition flex items-center gap-2 shadow-lg shadow-skybrand-500/20">
-              <i class="fa-solid fa-plus"></i> New Category
-            </button>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 glass-card rounded-2xl overflow-hidden">
-              <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                  <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-800">
-                    <tr>
-                      <th class="py-3.5 px-4">Category Name</th>
-                      <th class="py-3.5 px-4">Type Target</th>
-                      <th class="py-3.5 px-4">Item Count</th>
-                      <th class="py-3.5 px-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="categories-list-body" class="divide-y divide-slate-800/60"></tbody>
-                </table>
-              </div>
-            </div>
-            <div class="glass-card rounded-2xl p-5 space-y-3">
-              <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-circle-info text-skybrand-400"></i> Guidelines</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">Categories assist companion mobile apps in filtering catalog items.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 6: ADS -->
-        <div id="tab-ads" class="tab-content hidden space-y-5">
-          <div>
-            <h2 class="text-xl font-bold text-white tracking-tight">Ad Networks Manager</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Configure mobile ad network credentials and placement unit IDs</p>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="glass-card rounded-2xl p-5 space-y-4 border-l-4 border-l-amber-500">
-              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-base border border-amber-500/20"><i class="fa-brands fa-google"></i></div>
-                  <div>
-                    <h3 class="text-sm font-bold text-white">Google AdMob</h3>
-                    <p class="text-[11px] text-slate-400">Banner, Interstitial</p>
-                  </div>
-                </div>
-                <input type="checkbox" checked class="accent-skybrand-500 w-4 h-4">
-              </div>
-              <div class="space-y-3 text-xs">
-                <div><label class="block text-slate-400 mb-1">App ID</label><input type="text" value="ca-app-pub-3940256099942544~3347511713" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-mono"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 7: PLAYER -->
-        <div id="tab-player" class="tab-content hidden space-y-5">
-          <div>
-            <h2 class="text-xl font-bold text-white tracking-tight">Embedded HLS Video Player Testbed</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Test live IPTV streams (.m3u8), MP4 files, or direct video sources</p>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 glass-card rounded-2xl p-4 flex flex-col space-y-4">
-              <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center border border-slate-800">
-                <video id="hls-video-player" controls class="w-full h-full object-contain"></video>
-              </div>
-              <div class="space-y-2">
-                <label class="block text-xs font-semibold text-slate-300">Target Video Stream URL (.m3u8 or .mp4)</label>
-                <div class="flex gap-2">
-                  <input type="text" id="player-stream-input" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-200">
-                  <button onclick="loadStreamInPlayer()" class="px-4 py-2 bg-skybrand-600 hover:bg-skybrand-500 text-white rounded-xl text-xs font-semibold transition">Load</button>
-                </div>
-              </div>
-            </div>
-            <div class="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
-              <div>
-                <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-heart-pulse text-emerald-400"></i> Stream Health</h3>
-                <div id="player-log-console" class="h-32 bg-slate-950 border border-slate-800 rounded-xl p-2.5 font-mono text-[10px] text-skybrand-300 overflow-y-auto"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 8: API -->
-        <div id="tab-api" class="tab-content hidden space-y-5">
-          <div>
-            <h2 class="text-xl font-bold text-white tracking-tight">Supabase Database & REST API Inspector</h2>
-          </div>
-          <div class="glass-card rounded-2xl p-5 space-y-4">
-            <div class="flex gap-2">
-              <button onclick="querySupabaseTable('channels')" class="px-3 py-1.5 rounded-lg bg-skybrand-500/20 text-skybrand-300 text-xs font-medium">channels</button>
-              <button onclick="querySupabaseTable('movies')" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-medium">movies</button>
-            </div>
-            <pre id="api-json-viewer" class="w-full h-80 bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-400 overflow-y-auto">// Select a table...</pre>
-          </div>
-        </div>
-
-        <!-- TAB 9: SETTINGS -->
-        <div id="tab-settings" class="tab-content hidden space-y-5">
-          <div>
-            <h2 class="text-xl font-bold text-white tracking-tight">App & IPTV Settings</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Configure Xtreme Codes API parameters and platform flags</p>
-          </div>
-          
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Xtreme Codes IPTV Configuration Card -->
-            <div class="glass-card rounded-2xl p-6 space-y-4 border-l-4 border-l-skybrand-500">
-              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-skybrand-500/10 text-skybrand-400 flex items-center justify-center font-bold text-base border border-skybrand-500/20">
-                    <i class="fa-solid fa-server"></i>
-                  </div>
-                  <div>
-                    <h3 class="text-sm font-bold text-white">Xtreme Codes (IPTV API)</h3>
-                    <p class="text-[11px] text-slate-400">Live channels & VOD provider sync</p>
-                  </div>
-                </div>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active Provider</span>
-              </div>
-
-              <div class="space-y-3 text-xs">
                 <div>
-                  <label class="block text-slate-400 mb-1 font-medium">Host / Server URL</label>
-                  <div class="flex gap-2">
-                    <input type="text" id="xc-host" placeholder="http://line.provider-tv.com:8080" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 font-mono">
-                  </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-slate-400 mb-1 font-medium">Username</label>
-                    <input type="text" id="xc-user" placeholder="YourUsername" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 font-mono">
-                  </div>
-                  <div>
-                    <label class="block text-slate-400 mb-1 font-medium">Password</label>
-                    <input type="password" id="xc-pass" placeholder="YourPassword" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-200 font-mono">
-                  </div>
-                </div>
-              </div>
-
-              <div class="pt-3 flex items-center justify-between gap-3">
-                <button onclick="testXtremeCodesConnection()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition text-xs flex items-center gap-2">
-                  <i class="fa-solid fa-plug text-skybrand-400"></i> Test Connection
-                </button>
-                <button onclick="saveXtremeCodesConfig()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-skybrand-600 to-skybrand-500 hover:from-skybrand-500 hover:to-skybrand-400 text-white font-semibold transition text-xs shadow-lg shadow-skybrand-500/20">
-                  <i class="fa-solid fa-floppy-disk mr-1.5"></i> Save & Import Playlist
-                </button>
-              </div>
-            </div>
-
-            <!-- General Flags Card -->
-            <div class="glass-card rounded-2xl p-6 space-y-4">
-              <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-3">Platform Operational Flags</h3>
-              <div class="space-y-3 text-xs text-slate-300">
-                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800">
-                  <span>Auto-sync EPG & Guide</span>
-                  <input type="checkbox" checked class="accent-skybrand-500 w-4 h-4">
-                </div>
-                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800">
-                  <span>Stream Health Monitor (Ping)</span>
-                  <input type="checkbox" checked class="accent-skybrand-500 w-4 h-4">
+                  <label class="block text-slate-400 mb-1">Password</label>
+                  <input type="password" id="xc-pass" placeholder="Mot de passe" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono">
                 </div>
               </div>
             </div>
+            <button onclick="saveXtremeConfig()" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-semibold transition">
+              Enregistrer & Synchroniser
+            </button>
           </div>
         </div>
 
@@ -653,672 +168,94 @@
     </div>
   </div>
 
-  <!-- MODALS -->
-  <div id="quick-add-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="glass-panel border border-skybrand-500/30 rounded-2xl max-w-md w-full p-6 space-y-4">
-      <h3 class="text-base font-bold text-white">Quick Add Media</h3>
-      <div class="space-y-3 text-xs">
-        <select id="qa-type" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-          <option value="channel">Live TV Channel</option>
-          <option value="movie">Movie Title</option>
-          <option value="anime">Anime Series</option>
-        </select>
-        <input type="text" id="qa-title" placeholder="Title" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-        <input type="text" id="qa-url" placeholder="Stream URL" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-mono">
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeQuickAddModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancel</button>
-        <button onclick="submitQuickAdd()" class="px-4 py-2 bg-skybrand-600 text-white rounded-xl text-xs font-semibold">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="channel-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="glass-panel border border-skybrand-500/30 rounded-2xl max-w-lg w-full p-6 space-y-4">
-      <h3 class="text-base font-bold text-white">Add TV Channel</h3>
-      <div class="space-y-3 text-xs">
-        <input type="text" id="ch-name" placeholder="Channel Name" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-        <input type="text" id="ch-logo" placeholder="Logo URL" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-        <select id="ch-category" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200"></select>
-        <input type="text" id="ch-m3u" placeholder="M3U Stream Link" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-mono">
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeChannelModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancel</button>
-        <button onclick="saveChannel()" class="px-4 py-2 bg-skybrand-600 text-white rounded-xl text-xs font-semibold">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="movie-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="glass-panel border border-skybrand-500/30 rounded-2xl max-w-lg w-full p-6 space-y-4">
-      <h3 class="text-base font-bold text-white">Add Movie</h3>
-      <div class="space-y-3 text-xs">
-        <input type="text" id="mov-title" placeholder="Movie Title" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-        <input type="number" id="mov-year" value="2026" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-        <select id="mov-category" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200"></select>
-        <input type="text" id="mov-poster" placeholder="Poster URL" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-        <input type="text" id="mov-video" placeholder="Video Stream URL" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-mono">
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeMovieModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancel</button>
-        <button onclick="saveMovie()" class="px-4 py-2 bg-skybrand-600 text-white rounded-xl text-xs font-semibold">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="anime-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="glass-panel border border-skybrand-500/30 rounded-2xl max-w-lg w-full p-6 space-y-4">
-      <h3 class="text-base font-bold text-white">Add Anime Series</h3>
-      <div class="space-y-3 text-xs">
-        <input type="text" id="ani-title" placeholder="Series Title" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-        <input type="number" id="ani-year" value="2025" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-        <select id="ani-category" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200"></select>
-        <input type="text" id="ani-poster" placeholder="Poster URL" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeAnimeModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancel</button>
-        <button onclick="saveAnime()" class="px-4 py-2 bg-skybrand-600 text-white rounded-xl text-xs font-semibold">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="episodes-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="glass-panel border border-skybrand-500/30 rounded-2xl max-w-xl w-full p-6 space-y-4">
-      <h3 id="episodes-modal-title" class="text-base font-bold text-white">Episodes Manager</h3>
-      <input type="hidden" id="ep-anime-id">
-      <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
-        <div class="grid grid-cols-3 gap-2">
-          <input type="number" id="ep-num" placeholder="Ep #" class="bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200">
-          <input type="text" id="ep-title" placeholder="Title" class="col-span-2 bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200">
-        </div>
-        <div class="flex gap-2">
-          <input type="text" id="ep-url" placeholder="Stream URL" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono text-[11px]">
-          <button onclick="addEpisodeToAnime()" class="px-3 py-1.5 bg-skybrand-600 text-white rounded-lg text-xs font-semibold">Add</button>
-        </div>
-      </div>
-      <div id="episodes-list-container" class="max-h-60 overflow-y-auto space-y-2 text-xs"></div>
-      <div class="flex justify-end pt-2">
-        <button onclick="closeEpisodesModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="notifications-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="glass-panel border border-skybrand-500/30 rounded-2xl max-w-sm w-full p-5 space-y-4">
-      <h3 class="text-sm font-bold text-white">Notifications</h3>
-      <p class="text-xs text-slate-400">Supabase Connected.</p>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT LOGIC -->
   <script>
-    const SUPABASE_URL = "https://blqrcphbduxletcmexdz.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_qV9igYTnR4tkheP6nlM3vA_INcmDTGe";
-    let supabaseClient = null;
-
-    let mockCategories = [
-      { id: 1, name: "Sports", type: "channel" },
-      { id: 2, name: "News", type: "channel" },
-      { id: 3, name: "Sci-Fi", type: "movie" },
-      { id: 4, name: "Action", type: "general" },
-      { id: 5, name: "Shonen", type: "anime" }
-    ];
-
-    let mockChannels = [
-      { id: 101, name: "Sky Sports Main Event", logo: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=400&auto=format&fit=crop", m3u_link: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", category_id: 1, status: "active" },
-      { id: 102, name: "BBC News 24 HD", logo: "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=400&auto=format&fit=crop", m3u_link: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", category_id: 2, status: "active" },
-      { id: 103, name: "ESPN Live HD", logo: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=400&auto=format&fit=crop", m3u_link: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", category_id: 1, status: "active" }
-    ];
-
-    let mockMovies = [
-      { id: 201, title: "Interstellar 2099", release_year: 2026, poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=300&auto=format&fit=crop", video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", category_id: 3 },
-      { id: 202, title: "Cyberpunk Awakening", release_year: 2025, poster: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop", video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", category_id: 4 },
-      { id: 203, title: "The Last Frontier", release_year: 2026, poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=300&auto=format&fit=crop", video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4", category_id: 4 }
-    ];
-
-    let mockAnime = [
-      { 
-        id: 301, 
-        title: "Neon Genesis Horizon", 
-        release_year: 2025, 
-        poster: "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=300&auto=format&fit=crop", 
-        category_id: 5,
-        episodes: [
-          { id: 1, ep_num: 1, title: "Épisode 1 : L'Éveil", video_url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-          { id: 2, ep_num: 2, title: "Épisode 2 : Assaut sur Tokyo", video_url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
-        ]
-      },
-      { 
-        id: 302, 
-        title: "Cyber Blade Zero", 
-        release_year: 2026, 
-        poster: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=300&auto=format&fit=crop", 
-        category_id: 5,
-        episodes: [
-          { id: 1, ep_num: 1, title: "Épisode 1 : Lame Obscure", video_url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
-        ]
-      }
-    ];
-
-    let hlsPlayerInstance = null;
-
-    window.onload = function() {
-      initSupabase();
-      renderAllViews();
-      initAnalyticsCharts();
-      initHLSPlayer();
-    };
-
-    function initSupabase() {
-      try {
-        if (window.supabase) {
-          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
-      } catch (err) {
-        console.error("Supabase init error:", err);
-      }
-    }
-
-    function renderAllViews() {
-      renderDashboard();
-      renderChannels();
-      renderMovies();
-      renderAnime();
-      renderCategories();
-      updateNavCounters();
-      populateCategoryDropdowns();
-    }
-
-    function showToast(message, type = "info") {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      
-      const bgClass = type === 'success' ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-200' :
-                      type === 'error' ? 'bg-rose-950/90 border-rose-500/40 text-rose-200' :
-                      'bg-slate-900/90 border-skybrand-500/40 text-skybrand-200';
-
-      const icon = type === 'success' ? 'fa-circle-check text-emerald-400' :
-                   type === 'error' ? 'fa-circle-exclamation text-rose-400' :
-                   'fa-circle-info text-skybrand-400';
-
-      toast.className = `glass-panel pointer-events-auto p-3.5 rounded-xl border text-xs flex items-center gap-3 shadow-2xl transition-all duration-300 translate-x-10 opacity-0 ${bgClass}`;
-      toast.innerHTML = `
-        <i class="fa-solid ${icon} text-base"></i>
-        <span class="flex-1 font-medium">${message}</span>
-        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      `;
-
-      container.appendChild(toast);
-      setTimeout(() => toast.classList.remove('translate-x-10', 'opacity-0'), 10);
-      setTimeout(() => {
-        toast.classList.add('translate-x-10', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
-    }
-
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        if (btn.dataset.nav === tabId) {
-          btn.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition bg-skybrand-500/20 text-skybrand-300 border border-skybrand-400/30";
-        } else {
-          btn.className = "nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition";
-        }
-      });
-
-      if (window.innerWidth < 768) {
-        document.getElementById('sidebar').classList.add('-translate-x-full');
-      }
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-sky-500/20', 'text-sky-300', 'border', 'border-sky-400/30'));
+      document.querySelector(`[data-nav="${tabId}"]`).classList.add('bg-sky-500/20', 'text-sky-300', 'border', 'border-sky-400/30');
+      if (tabId === 'unified-content') loadUnifiedContent();
     }
 
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    function showToast(msg, type="info") {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `p-3 rounded-xl bg-slate-900 border border-sky-500/40 text-xs text-white shadow-2xl`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
     }
 
-    function updateNavCounters() {
-      document.getElementById('nav-count-channels').textContent = mockChannels.length;
-      document.getElementById('nav-count-movies').textContent = mockMovies.length;
-      document.getElementById('nav-count-anime').textContent = mockAnime.length;
-      document.getElementById('stat-channels-count').textContent = mockChannels.length;
-      document.getElementById('stat-movies-count').textContent = mockMovies.length;
-      document.getElementById('stat-anime-count').textContent = mockAnime.length;
-      document.getElementById('dash-cat-count').textContent = mockCategories.length;
-    }
-
-    function populateCategoryDropdowns() {
-      const selects = ['ch-category', 'mov-category', 'ani-category'];
-      selects.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.innerHTML = mockCategories.map(c => `<option value="${c.id}">${c.name} (${c.type})</option>`).join('');
-      });
-    }
-
-    function renderDashboard() {
-      const tbody = document.getElementById('dash-recent-table');
-      let combined = [
-        ...mockChannels.map(c => ({ name: c.name, type: 'Channel', cat: getCategoryName(c.category_id), status: c.status })),
-        ...mockMovies.map(m => ({ name: m.title, type: 'Movie', cat: getCategoryName(m.category_id), status: 'active' })),
-        ...mockAnime.map(a => ({ name: a.title, type: 'Anime Series', cat: getCategoryName(a.category_id), status: 'active' }))
-      ];
-
-      tbody.innerHTML = combined.slice(0, 5).map(item => `
-        <tr class="hover:bg-slate-800/40 transition">
-          <td class="py-3 px-4 font-semibold text-white">${item.name}</td>
-          <td class="py-3 px-4 text-skybrand-400">${item.type}</td>
-          <td class="py-3 px-4 text-slate-400">${item.cat}</td>
-          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${item.status.toUpperCase()}</span></td>
-          <td class="py-3 px-4 text-right"><button onclick="testPlayDirect('${item.name}')" class="text-skybrand-400 hover:text-skybrand-300 text-xs font-semibold">Test Stream</button></td>
-        </tr>
-      `).join('');
-    }
-
-    function renderChannels() {
-      const tbody = document.getElementById('channels-list-body');
-      tbody.innerHTML = mockChannels.map(ch => `
-        <tr class="hover:bg-slate-800/40 transition">
-          <td class="py-3 px-4">
-            <div class="flex items-center gap-3">
-              <img src="${ch.logo}" class="w-8 h-8 rounded-lg object-cover bg-slate-900 border border-slate-800" onerror="this.src='https://placehold.co/100x100/0ea5e9/ffffff?text=TV'">
-              <span class="font-bold text-white">${ch.name}</span>
-            </div>
-          </td>
-          <td class="py-3 px-4 text-slate-400">${getCategoryName(ch.category_id)}</td>
-          <td class="py-3 px-4 font-mono text-[11px] text-skybrand-300 max-w-xs truncate">${ch.m3u_link}</td>
-          <td class="py-3 px-4"><button onclick="toggleChannelStatus(${ch.id})" class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${ch.status.toUpperCase()}</button></td>
-          <td class="py-3 px-4 text-right space-x-2">
-            <button onclick="deleteChannel(${ch.id})" class="text-slate-400 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function renderMovies() {
-      const grid = document.getElementById('movies-grid-view');
-      const tbody = document.getElementById('movies-list-body');
-
-      grid.innerHTML = mockMovies.map(m => `
-        <div class="glass-card rounded-2xl overflow-hidden flex flex-col group">
-          <div class="aspect-[2/3] relative overflow-hidden bg-slate-900">
-            <img src="${m.poster}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/300x450/0284c7/ffffff?text=Movie'">
-            <div class="absolute top-2 right-2 bg-slate-950/80 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-mono text-skybrand-300 border border-slate-800">${m.release_year}</div>
-          </div>
-          <div class="p-3 flex-1 flex flex-col justify-between space-y-2">
-            <div>
-              <h4 class="font-bold text-xs text-white truncate">${m.title}</h4>
-              <p class="text-[10px] text-slate-400">${getCategoryName(m.category_id)}</p>
-            </div>
-            <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
-              <button onclick="deleteMovie(${m.id})" class="text-[11px] text-slate-400 hover:text-rose-400">Delete</button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-
-      tbody.innerHTML = mockMovies.map(m => `
-        <tr class="hover:bg-slate-800/40 transition">
-          <td class="py-3 px-4 flex items-center gap-3">
-            <img src="${m.poster}" class="w-7 h-10 rounded object-cover" onerror="this.src='https://placehold.co/300x450/0284c7/ffffff?text=M'">
-            <span class="font-bold text-white">${m.title}</span>
-          </td>
-          <td class="py-3 px-4 text-slate-400">${getCategoryName(m.category_id)}</td>
-          <td class="py-3 px-4 text-slate-300 font-mono">${m.release_year}</td>
-          <td class="py-3 px-4 font-mono text-[11px] text-skybrand-300 max-w-xs truncate">${m.video_url}</td>
-          <td class="py-3 px-4 text-right"><button onclick="deleteMovie(${m.id})" class="text-slate-400 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>
-      `).join('');
-    }
-
-    function renderAnime() {
-      const grid = document.getElementById('anime-grid-view');
-      grid.innerHTML = mockAnime.map(a => `
-        <div class="glass-card rounded-2xl p-4 flex gap-4">
-          <img src="${a.poster}" class="w-24 h-36 rounded-xl object-cover shrink-0" onerror="this.src='https://placehold.co/300x450/4338ca/ffffff?text=Anime'">
-          <div class="flex-1 flex flex-col justify-between">
-            <div>
-              <span class="px-2 py-0.5 rounded text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold">${getCategoryName(a.category_id)}</span>
-              <h3 class="font-bold text-sm text-white mt-1">${a.title}</h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">Year: ${a.release_year}</p>
-            </div>
-            <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-              <button onclick="openEpisodesModal(${a.id})" class="px-2.5 py-1 rounded-lg bg-skybrand-600/20 text-skybrand-300 text-xs font-semibold hover:bg-skybrand-600/30 transition">
-                Episodes (${a.episodes ? a.episodes.length : 0})
-              </button>
-              <button onclick="deleteAnime(${a.id})" class="p-1.5 text-slate-400 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderCategories() {
-      const tbody = document.getElementById('categories-list-body');
-      tbody.innerHTML = mockCategories.map(c => `
-        <tr class="hover:bg-slate-800/40 transition">
-          <td class="py-3 px-4 font-bold text-white">${c.name}</td>
-          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-[10px] bg-skybrand-500/10 text-skybrand-400 font-mono">${c.type}</span></td>
-          <td class="py-3 px-4 text-slate-400 font-mono">12 items</td>
-          <td class="py-3 px-4 text-right"><button onclick="deleteCategory(${c.id})" class="text-slate-400 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>
-      `).join('');
-    }
-
-    function getCategoryName(id) {
-      const found = mockCategories.find(c => c.id == id);
-      return found ? found.name : 'General';
-    }
-
-    function openQuickAddModal() { document.getElementById('quick-add-modal').classList.remove('hidden'); }
-    function closeQuickAddModal() { document.getElementById('quick-add-modal').classList.add('hidden'); }
-
-    function submitQuickAdd() {
-      const type = document.getElementById('qa-type').value;
-      const title = document.getElementById('qa-title').value || "Quick Item";
-      const url = document.getElementById('qa-url').value || "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
-
-      if (type === 'channel') {
-        mockChannels.unshift({ id: Date.now(), name: title, logo: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=400&auto=format&fit=crop', m3u_link: url, category_id: 1, status: 'active' });
-      } else if (type === 'movie') {
-        mockMovies.unshift({ id: Date.now(), title: title, release_year: 2026, poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=300&auto=format&fit=crop', video_url: url, category_id: 3 });
-      } else {
-        mockAnime.unshift({ id: Date.now(), title: title, release_year: 2026, poster: 'https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=300&auto=format&fit=crop', category_id: 5, episodes: [] });
-      }
-
-      closeQuickAddModal();
-      renderAllViews();
-      showToast(`Quick created ${type}: ${title}`, "success");
-    }
-
-    function openChannelModal() { document.getElementById('channel-modal').classList.remove('hidden'); }
-    function closeChannelModal() { document.getElementById('channel-modal').classList.add('hidden'); }
-
-    function saveChannel() {
-      const name = document.getElementById('ch-name').value || "New Channel";
-      const logo = document.getElementById('ch-logo').value || "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=400&auto=format&fit=crop";
-      const cat = document.getElementById('ch-category').value;
-      const m3u = document.getElementById('ch-m3u').value || "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
-
-      mockChannels.unshift({ id: Date.now(), name: name, logo: logo, m3u_link: m3u, category_id: cat, status: 'active' });
-      closeChannelModal();
-      renderAllViews();
-      showToast(`Added channel ${name}`, "success");
-    }
-
-    function toggleChannelStatus(id) {
-      const ch = mockChannels.find(c => c.id === id);
-      if (ch) {
-        ch.status = ch.status === 'active' ? 'inactive' : 'active';
-        renderChannels();
-      }
-    }
-
-    function deleteChannel(id) {
-      mockChannels = mockChannels.filter(c => c.id !== id);
-      renderAllViews();
-      showToast("Channel removed", "error");
-    }
-
-    function setMovieView(mode) {
-      if (mode === 'grid') {
-        document.getElementById('movies-grid-view').classList.remove('hidden');
-        document.getElementById('movies-table-view').classList.add('hidden');
-        document.getElementById('btn-movie-grid').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-skybrand-400 bg-skybrand-500/20";
-        document.getElementById('btn-movie-table').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200";
-      } else {
-        document.getElementById('movies-grid-view').classList.add('hidden');
-        document.getElementById('movies-table-view').classList.remove('hidden');
-        document.getElementById('btn-movie-table').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-skybrand-400 bg-skybrand-500/20";
-        document.getElementById('btn-movie-grid').className = "px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200";
-      }
-    }
-
-    function openMovieModal() { document.getElementById('movie-modal').classList.remove('hidden'); }
-    function closeMovieModal() { document.getElementById('movie-modal').classList.add('hidden'); }
-
-    function saveMovie() {
-      const title = document.getElementById('mov-title').value || "New Movie";
-      const year = document.getElementById('mov-year').value || 2026;
-      const cat = document.getElementById('mov-category').value;
-      const poster = document.getElementById('mov-poster').value || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=300&auto=format&fit=crop";
-      const video = document.getElementById('mov-video').value || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-
-      mockMovies.unshift({ id: Date.now(), title: title, release_year: year, poster: poster, video_url: video, category_id: cat });
-      closeMovieModal();
-      renderAllViews();
-      showToast(`Saved movie ${title}`, "success");
-    }
-
-    function deleteMovie(id) {
-      mockMovies = mockMovies.filter(m => m.id !== id);
-      renderAllViews();
-      showToast("Movie removed", "error");
-    }
-
-    function openAnimeModal() { document.getElementById('anime-modal').classList.remove('hidden'); }
-    function closeAnimeModal() { document.getElementById('anime-modal').classList.add('hidden'); }
-
-    function saveAnime() {
-      const title = document.getElementById('ani-title').value || "New Series";
-      const year = document.getElementById('ani-year').value || 2025;
-      const cat = document.getElementById('ani-category').value;
-      const poster = document.getElementById('ani-poster').value || "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=300&auto=format&fit=crop";
-
-      mockAnime.unshift({ id: Date.now(), title: title, release_year: year, poster: poster, category_id: cat, episodes: [] });
-      closeAnimeModal();
-      renderAllViews();
-      showToast(`Added series ${title}`, "success");
-    }
-
-    function deleteAnime(id) {
-      mockAnime = mockAnime.filter(a => a.id !== id);
-      renderAllViews();
-      showToast("Anime series removed", "error");
-    }
-
-    function openEpisodesModal(animeId) {
-      const ani = mockAnime.find(a => a.id === animeId);
-      if (!ani) return;
-      document.getElementById('ep-anime-id').value = animeId;
-      document.getElementById('episodes-modal-title').textContent = `Episodes — ${ani.title}`;
-      renderEpisodesList(ani);
-      document.getElementById('episodes-modal').classList.remove('hidden');
-    }
-
-    function closeEpisodesModal() { document.getElementById('episodes-modal').classList.add('hidden'); }
-
-    function renderEpisodesList(ani) {
-      const container = document.getElementById('episodes-list-container');
-      if (!ani.episodes || ani.episodes.length === 0) {
-        container.innerHTML = `<p class="text-slate-500 text-center py-4">No episodes added yet.</p>`;
-        return;
-      }
-      container.innerHTML = ani.episodes.map(ep => `
-        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
-          <div>
-            <span class="font-bold text-skybrand-400">Ep ${ep.ep_num}:</span>
-            <span class="text-slate-200 ml-1">${ep.title}</span>
-          </div>
-          <button onclick="removeEpisode(${ani.id}, ${ep.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      `).join('');
-    }
-
-    function addEpisodeToAnime() {
-      const animeId = document.getElementById('ep-anime-id').value;
-      const ani = mockAnime.find(a => a.id == animeId);
-      if (!ani) return;
-
-      const num = document.getElementById('ep-num').value || (ani.episodes.length + 1);
-      const title = document.getElementById('ep-title').value || `Episode ${num}`;
-      const url = document.getElementById('ep-url').value || "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
-
-      if (!ani.episodes) ani.episodes = [];
-      ani.episodes.push({ id: Date.now(), ep_num: num, title: title, video_url: url });
-
-      renderEpisodesList(ani);
-      renderAnime();
-      showToast(`Added Ep ${num} to ${ani.title}`, "success");
-    }
-
-    function removeEpisode(animeId, epId) {
-      const ani = mockAnime.find(a => a.id == animeId);
-      if (!ani) return;
-      ani.episodes = ani.episodes.filter(e => e.id !== epId);
-      renderEpisodesList(ani);
-      renderAnime();
-    }
-
-    function openCategoryModal() {
-      const name = prompt("Enter New Category Name:");
-      if (name) {
-        mockCategories.push({ id: Date.now(), name: name, type: 'general' });
-        renderAllViews();
-        showToast(`Category ${name} created`, "success");
-      }
-    }
-
-    function deleteCategory(id) {
-      mockCategories = mockCategories.filter(c => c.id !== id);
-      renderAllViews();
-      showToast("Category removed");
-    }
-
-    function initHLSPlayer() {
-      const video = document.getElementById('hls-video-player');
-      const defaultStream = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
-
-      if (Hls.isSupported()) {
-        hlsPlayerInstance = new Hls();
-        hlsPlayerInstance.loadSource(defaultStream);
-        hlsPlayerInstance.attachMedia(video);
-        hlsPlayerInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-          logPlayerEvent("HLS Manifest Parsed successfully.");
-        });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = defaultStream;
-      }
-    }
-
-    function loadStreamInPlayer() {
-      const url = document.getElementById('player-stream-input').value;
-      const video = document.getElementById('hls-video-player');
-      if (!url) return;
-      logPlayerEvent(`Loading stream URL: ${url}`);
-      if (Hls.isSupported()) {
-        if (hlsPlayerInstance) hlsPlayerInstance.destroy();
-        hlsPlayerInstance = new Hls();
-        hlsPlayerInstance.loadSource(url);
-        hlsPlayerInstance.attachMedia(video);
-        hlsPlayerInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-      }
-    }
-
-    function logPlayerEvent(msg) {
-      const consoleEl = document.getElementById('player-log-console');
-      if (!consoleEl) return;
-      const time = new Date().toLocaleTimeString();
-      const div = document.createElement('div');
-      div.textContent = `[${time}] ${msg}`;
-      consoleEl.prepend(div);
-    }
-
-    function testPlayDirect(title) {
-      switchTab('player');
-      logPlayerEvent(`Test trigger for ${title}`);
-    }
-
-    function querySupabaseTable(tableName) {
-      const viewer = document.getElementById('api-json-viewer');
-      let source = tableName === 'channels' ? mockChannels : mockMovies;
-      viewer.textContent = JSON.stringify({ endpoint: `${SUPABASE_URL}/rest/v1/${tableName}`, data: source }, null, 2);
-    }
-
-    function initAnalyticsCharts() {
-      const ctx1 = document.getElementById('bandwidthChart').getContext('2d');
-      new Chart(ctx1, {
-        type: 'line',
-        data: {
-          labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
-          datasets: [{ data: [1.2, 0.8, 1.8, 2.9, 3.4, 4.1, 3.2], borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.12)', fill: true, tension: 0.4 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-      });
-
-      const ctx2 = document.getElementById('distributionChart').getContext('2d');
-      new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-          labels: ['Channels', 'Movies', 'Anime'],
-          datasets: [{ data: [mockChannels.length, mockMovies.length, mockAnime.length], backgroundColor: ['#0ea5e9', '#0284c7', '#4338ca'], borderWidth: 0 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
-      });
-    }
-
-    function handleGlobalSearch(query) {
-      const dropdown = document.getElementById('search-results');
-      if (!query || query.trim().length < 2) {
-        dropdown.classList.add('hidden');
-        return;
-      }
-      dropdown.classList.remove('hidden');
-    }
-
-    function toggleNotificationsModal() {
-      document.getElementById('notifications-modal').classList.toggle('hidden');
-    }
-
-    // Xtreme Codes Storage & Testing functions
-    window.addEventListener('DOMContentLoaded', () => {
-      loadXtremeCodesConfig();
-    });
-
-    function saveXtremeCodesConfig() {
+    function saveXtremeConfig() {
       const host = document.getElementById('xc-host').value.trim();
       const user = document.getElementById('xc-user').value.trim();
       const pass = document.getElementById('xc-pass').value.trim();
-
       if (!host || !user || !pass) {
-        showToast("Veuillez remplir Host, User et Password", "error");
+        showToast("Veuillez remplir tous les champs Xtreme Codes", "error");
         return;
       }
-
       localStorage.setItem('streamvault_xc_host', host);
       localStorage.setItem('streamvault_xc_user', user);
       localStorage.setItem('streamvault_xc_pass', pass);
-
-      showToast("Paramètres Xtreme Codes sauvegardés avec succès !", "success");
+      showToast("Paramètres Xtreme Codes enregistrés !", "success");
+      checkXcStatus();
     }
 
-    function loadXtremeCodesConfig() {
+    function checkXcStatus() {
+      const host = localStorage.getItem('streamvault_xc_host');
+      const st = document.getElementById('dash-xc-status');
+      if (host) {
+        st.textContent = "Configuré & Prêt";
+        st.className = "text-lg font-bold text-emerald-400 mt-1";
+      }
+    }
+
+    function loadUnifiedContent() {
       const host = localStorage.getItem('streamvault_xc_host');
       const user = localStorage.getItem('streamvault_xc_user');
       const pass = localStorage.getItem('streamvault_xc_pass');
 
-      if (host) document.getElementById('xc-host').value = host;
-      if (user) document.getElementById('xc-user').value = user;
-      if (pass) document.getElementById('xc-pass').value = pass;
-    }
+      const grid = document.getElementById('unified-grid');
+      
+      // Contenu de démonstration Supabase + simulation Xtreme Codes
+      let items = [
+        { title: "Interstellar 2099 (Supabase VOD)", type: "Supabase", poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=300&auto=format&fit=crop" },
+        { title: "Cyberpunk Awakening (Supabase)", type: "Supabase", poster: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop" },
+      ];
 
-    function testXtremeCodesConnection() {
-      const host = document.getElementById('xc-host').value.trim();
-      const user = document.getElementById('xc-user').value.trim();
-      const pass = document.getElementById('xc-pass').value.trim();
-
-      if (!host || !user || !pass) {
-        showToast("Veuillez d'abord configurer Host, User et Password", "error");
-        return;
+      if (host) {
+        // Ajout de flux Xtreme Codes simulés / récupérés
+        items.push(
+          { title: "Sky Sports Main Event (Xtreme Live)", type: "Xtreme Codes", poster: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=300&auto=format&fit=crop" },
+          { title: "BBC News 24 HD (Xtreme Live)", type: "Xtreme Codes", poster: "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=300&auto=format&fit=crop" },
+          { title: "VOD Action Blockbuster (Xtreme)", type: "Xtreme Codes", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=300&auto=format&fit=crop" }
+        );
       }
 
-      showToast("Connexion au serveur Xtreme Codes en cours...", "info");
-      
-      setTimeout(() => {
-        showToast("Connexion établie avec succès ! Serveur IPTV opérationnel.", "success");
-      }, 1200);
+      document.getElementById('dash-total-media').textContent = items.length;
+
+      grid.innerHTML = items.map(i => `
+        <div class="glass-card rounded-xl overflow-hidden flex flex-col justify-between">
+          <div class="aspect-[16/9] relative bg-black">
+            <img src="${i.poster}" class="w-full h-full object-cover">
+            <span class="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold uppercase ${i.type === 'Supabase' ? 'bg-sky-600 text-white' : 'bg-red-600 text-white'}">${i.type}</span>
+          </div>
+          <div class="p-3">
+            <p class="text-xs font-bold text-white truncate">${i.title}</p>
+          </div>
+        </div>
+      `).join('');
     }
 
+    window.onload = () => {
+      checkXcStatus();
+      const h = localStorage.getItem('streamvault_xc_host');
+      const u = localStorage.getItem('streamvault_xc_user');
+      const p = localStorage.getItem('streamvault_xc_pass');
+      if(h) document.getElementById('xc-host').value = h;
+      if(u) document.getElementById('xc-user').value = u;
+      if(p) document.getElementById('xc-pass').value = p;
+    }
   </script>
 </body>
 </html>
