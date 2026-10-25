@@ -1,0 +1,7 @@
+{
+  "name": "StreamVault",
+  "description": "Unified Supabase & Xtreme Codes IPTV Platform with dashboard and Netflix viewing mode",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
