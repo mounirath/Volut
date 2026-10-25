@@ -12,21 +12,27 @@ import {
   saveCustomMediaItem,
   deleteCustomMediaItem,
   getM3uItems,
+  saveM3uItems,
+  getXtremeItems,
+  saveXtremeItems,
+  resetXtremeItems,
 } from './services/storage';
 import { Sidebar, TabId } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { IptvSection } from './components/IptvSection';
 import { UnifiedContent } from './components/UnifiedContent';
+import { MediaManager } from './components/MediaManager';
 import { XtremeConfigView } from './components/XtremeConfig';
 import { SupabaseConfigView } from './components/SupabaseConfig';
 import { NetflixMode } from './components/NetflixMode';
-import { VideoPlayerModal } from './components/VideoPlayerModal';
+import { IntegratedPlayer } from './components/IntegratedPlayer';
 import { AddMediaModal } from './components/AddMediaModal';
 import { ToastContainer } from './components/ToastContainer';
 import { AmbientBackground, BackgroundTheme } from './components/AmbientBackground';
 import { BackendDrawer } from './components/BackendDrawer';
 import { M3uModal } from './components/M3uModal';
+import { PlaylistManagerModal } from './components/PlaylistManagerModal';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
@@ -38,6 +44,7 @@ export const App: React.FC = () => {
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isM3uModalOpen, setIsM3uModalOpen] = useState(false);
+  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [isBackendDrawerOpen, setIsBackendDrawerOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
@@ -74,11 +81,12 @@ export const App: React.FC = () => {
     const config = getXtremeConfig();
     const custom = getCustomMedia();
     const m3uItems = getM3uItems();
+    const xtremeItems = getXtremeItems();
 
     let items: MediaItem[] = [...custom, ...m3uItems, ...INITIAL_SUPABASE_ITEMS];
 
     if (config.isConnected) {
-      items = [...items, ...INITIAL_XTREME_ITEMS];
+      items = [...items, ...xtremeItems];
     }
 
     setMediaItems(items);
@@ -123,10 +131,38 @@ export const App: React.FC = () => {
     showToast(`Média "${item.title}" ajouté au catalogue !`, "success");
   };
 
+  // Modify / update any existing media item (Supabase, Xtreme, M3U, Custom)
+  const handleUpdateMedia = (updatedItem: MediaItem) => {
+    if (updatedItem.type === 'Xtreme Codes' && !updatedItem.id.startsWith('custom-') && !updatedItem.id.startsWith('m3u-')) {
+      const currentXtreme = getXtremeItems();
+      const updatedXtreme = currentXtreme.map((i) => (i.id === updatedItem.id ? updatedItem : i));
+      saveXtremeItems(updatedXtreme);
+    } else if (updatedItem.id.startsWith('m3u-')) {
+      const currentM3u = getM3uItems();
+      const updatedM3u = currentM3u.map((i) => (i.id === updatedItem.id ? updatedItem : i));
+      saveM3uItems(updatedM3u);
+    } else {
+      saveCustomMediaItem(updatedItem);
+    }
+    loadMedia();
+  };
+
+  // Delete any media item
   const handleDeleteMedia = (id: string) => {
     deleteCustomMediaItem(id);
+    const currentM3u = getM3uItems().filter((i) => i.id !== id);
+    saveM3uItems(currentM3u);
+    const currentXtreme = getXtremeItems().filter((i) => i.id !== id);
+    saveXtremeItems(currentXtreme);
     loadMedia();
     showToast("Média retiré du catalogue.", "info");
+  };
+
+  // Reset Xtreme Codes content to default
+  const handleResetXtreme = () => {
+    resetXtremeItems();
+    loadMedia();
+    showToast("Contenu Xtreme Codes réinitialisé aux valeurs par défaut !", "info");
   };
 
   const handleLoadDemoIptv = () => {
@@ -149,7 +185,12 @@ export const App: React.FC = () => {
           onBackToDashboard={() => setIsNetflixMode(false)}
           onPlayMedia={(item) => setSelectedMedia(item)}
         />
-        <VideoPlayerModal media={selectedMedia} onClose={() => setSelectedMedia(null)} />
+        <IntegratedPlayer
+          media={selectedMedia}
+          playlistItems={mediaItems}
+          onClose={() => setSelectedMedia(null)}
+          onSelectMedia={(item) => setSelectedMedia(item)}
+        />
       </div>
     );
   }
@@ -167,7 +208,7 @@ export const App: React.FC = () => {
         activeTab={activeTab}
         onTabChange={(tab) => {
           setActiveTab(tab);
-          if (tab === 'unified-content' || tab === 'iptv-section') {
+          if (tab === 'unified-content' || tab === 'iptv-section' || tab === 'media-manager') {
             loadMedia();
           }
         }}
@@ -187,7 +228,7 @@ export const App: React.FC = () => {
             onTabChange={(tab) => {
               setActiveTab(tab);
               setIsMobileSidebarOpen(false);
-              if (tab === 'unified-content' || tab === 'iptv-section') loadMedia();
+              if (tab === 'unified-content' || tab === 'iptv-section' || tab === 'media-manager') loadMedia();
             }}
             onOpenNetflix={() => {
               setIsMobileSidebarOpen(false);
@@ -222,7 +263,7 @@ export const App: React.FC = () => {
               mediaItems={mediaItems}
               onNavigate={(tab) => {
                 setActiveTab(tab);
-                if (tab === 'unified-content' || tab === 'iptv-section') loadMedia();
+                if (tab === 'unified-content' || tab === 'iptv-section' || tab === 'media-manager') loadMedia();
               }}
               onOpenNetflix={() => setIsNetflixMode(true)}
               onPlayMedia={(item) => setSelectedMedia(item)}
@@ -239,6 +280,20 @@ export const App: React.FC = () => {
               isRefreshing={isRefreshing}
               onLoadDemoConfig={handleLoadDemoIptv}
               onOpenM3uModal={() => setIsM3uModalOpen(true)}
+              onOpenPlaylistModal={() => setIsPlaylistModalOpen(true)}
+            />
+          )}
+
+          {activeTab === 'media-manager' && (
+            <MediaManager
+              mediaItems={mediaItems}
+              onPlayMedia={(item) => setSelectedMedia(item)}
+              onUpdateMedia={handleUpdateMedia}
+              onDeleteMedia={handleDeleteMedia}
+              onAddNewMedia={handleAddMedia}
+              onResetXtremeContent={handleResetXtreme}
+              onOpenM3uModal={() => setIsM3uModalOpen(true)}
+              onShowToast={showToast}
             />
           )}
 
@@ -282,7 +337,7 @@ export const App: React.FC = () => {
         activeTab={activeTab}
         onSelectTab={(tab) => {
           setActiveTab(tab);
-          if (tab === 'unified-content' || tab === 'iptv-section') loadMedia();
+          if (tab === 'unified-content' || tab === 'iptv-section' || tab === 'media-manager') loadMedia();
         }}
         xtremeConfig={xcConfig}
         supabaseConfig={sbConfig}
@@ -290,6 +345,7 @@ export const App: React.FC = () => {
         onRefreshStreams={handleRefreshFlux}
         isRefreshing={isRefreshing}
         onOpenM3uModal={() => setIsM3uModalOpen(true)}
+        onOpenPlaylistModal={() => setIsPlaylistModalOpen(true)}
       />
 
       {/* M3U Playlist Manager Modal */}
@@ -301,8 +357,21 @@ export const App: React.FC = () => {
         onShowToast={showToast}
       />
 
-      {/* Video Player Modal */}
-      <VideoPlayerModal media={selectedMedia} onClose={() => setSelectedMedia(null)} />
+      {/* Multi-Playlist Manager Modal (Gestion des Listes) */}
+      <PlaylistManagerModal
+        isOpen={isPlaylistModalOpen}
+        onClose={() => setIsPlaylistModalOpen(false)}
+        onPlaylistActivated={() => loadMedia()}
+        onShowToast={showToast}
+      />
+
+      {/* Integrated Full-featured VOD & Live Player */}
+      <IntegratedPlayer
+        media={selectedMedia}
+        playlistItems={mediaItems}
+        onClose={() => setSelectedMedia(null)}
+        onSelectMedia={(item) => setSelectedMedia(item)}
+      />
 
       {/* Add Media Modal */}
       <AddMediaModal

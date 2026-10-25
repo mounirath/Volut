@@ -1,4 +1,4 @@
-import { MediaItem, XtremeConfig, SupabaseConfig } from '../types';
+import { MediaItem, XtremeConfig, SupabaseConfig, SavedPlaylist } from '../types';
 
 export const INITIAL_SUPABASE_ITEMS: MediaItem[] = [
   {
@@ -368,4 +368,98 @@ export const saveM3uItems = (items: MediaItem[]) => {
 
 export const clearM3uItems = () => {
   localStorage.removeItem('streamvault_m3u_items');
+};
+
+// --- XTREME CODES CUSTOM CONTENT & OVERRIDES ---
+export const getXtremeItems = (): MediaItem[] => {
+  const custom = localStorage.getItem('streamvault_xtreme_items');
+  if (custom) {
+    try {
+      return JSON.parse(custom);
+    } catch {
+      return INITIAL_XTREME_ITEMS;
+    }
+  }
+  return INITIAL_XTREME_ITEMS;
+};
+
+export const saveXtremeItems = (items: MediaItem[]) => {
+  localStorage.setItem('streamvault_xtreme_items', JSON.stringify(items));
+};
+
+export const resetXtremeItems = () => {
+  localStorage.removeItem('streamvault_xtreme_items');
+};
+
+// --- PLAYLISTS MANAGER (Gestion des Listes) ---
+export const getSavedPlaylists = (): SavedPlaylist[] => {
+  const data = localStorage.getItem('streamvault_saved_playlists');
+  if (data) {
+    try {
+      return JSON.parse(data);
+    } catch {
+      // ignore
+    }
+  }
+
+  // Initial default playlists
+  const defaults: SavedPlaylist[] = [
+    {
+      id: 'pl-main',
+      name: 'Playlist Principale Xtreme & M3U',
+      type: 'xtreme',
+      url: localStorage.getItem('streamvault_m3u_url') || '',
+      itemCount: INITIAL_XTREME_ITEMS.length,
+      createdAt: '2025-01-15',
+      isActive: true,
+      items: INITIAL_XTREME_ITEMS,
+    },
+    {
+      id: 'pl-cinema-sports',
+      name: 'Bouquet Sport Live & Cinéma 4K',
+      type: 'm3u',
+      itemCount: 4,
+      createdAt: '2025-02-10',
+      isActive: false,
+      items: INITIAL_XTREME_ITEMS.filter((i) => i.category === 'Live' || i.category === 'VOD'),
+    }
+  ];
+
+  localStorage.setItem('streamvault_saved_playlists', JSON.stringify(defaults));
+  return defaults;
+};
+
+export const savePlaylistRecord = (playlist: SavedPlaylist) => {
+  const existing = getSavedPlaylists();
+  const index = existing.findIndex((p) => p.id === playlist.id);
+  let updated: SavedPlaylist[];
+  if (index >= 0) {
+    updated = existing.map((p) => (p.id === playlist.id ? playlist : p));
+  } else {
+    updated = [playlist, ...existing];
+  }
+  localStorage.setItem('streamvault_saved_playlists', JSON.stringify(updated));
+  return updated;
+};
+
+export const deletePlaylistRecord = (id: string) => {
+  const existing = getSavedPlaylists();
+  const updated = existing.filter((p) => p.id !== id);
+  localStorage.setItem('streamvault_saved_playlists', JSON.stringify(updated));
+  return updated;
+};
+
+export const setActivePlaylistRecord = (id: string) => {
+  const existing = getSavedPlaylists();
+  const updated = existing.map((p) => ({
+    ...p,
+    isActive: p.id === id,
+  }));
+  localStorage.setItem('streamvault_saved_playlists', JSON.stringify(updated));
+
+  const active = updated.find((p) => p.id === id);
+  if (active && active.items) {
+    saveM3uItems(active.items);
+  }
+  return updated;
 };

@@ -41,6 +41,8 @@ export const Header: React.FC<HeaderProps> = ({
         return 'Tableau de Bord & Backend Unifié';
       case 'iptv-section':
         return 'Section IPTV Xtreme Codes (Live TV, Films & Séries)';
+      case 'media-manager':
+        return 'Gestion des Médias, Xtreme Codes & Playlists M3U';
       case 'unified-content':
         return 'Catalogue & Flux Multimédias Unifiés';
       case 'xtreme-config':

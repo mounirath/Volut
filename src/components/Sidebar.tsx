@@ -1,7 +1,7 @@
 import React from 'react';
-import { Play, LineChart, Film, Server, Database, Tv, Radio, X } from 'lucide-react';
+import { Play, LineChart, Film, Server, Database, Tv, Radio, X, FolderKanban } from 'lucide-react';
 
-export type TabId = 'dashboard' | 'iptv-section' | 'unified-content' | 'xtreme-config' | 'supabase-config';
+export type TabId = 'dashboard' | 'iptv-section' | 'unified-content' | 'media-manager' | 'xtreme-config' | 'supabase-config';
 
 interface SidebarProps {
   activeTab: TabId;
@@ -103,7 +103,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }`}
           >
             <Film className="w-4 h-4 text-sky-400 shrink-0" />
-            <span className="truncate">Contenu Unifié (Supabase + Xtreme)</span>
+            <span className="truncate">Contenu Unifié</span>
+          </button>
+
+          {/* New Media & Lists Manager Tab */}
+          <button
+            onClick={() => handleTabClick('media-manager')}
+            data-nav="media-manager"
+            className={`nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium transition ${
+              activeTab === 'media-manager'
+                ? 'bg-sky-500/20 text-sky-300 border border-sky-400/30 shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <FolderKanban className="w-4 h-4 text-sky-400 shrink-0" />
+              <span>Gestion Médias & Listes</span>
+            </div>
+            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-sky-600/60 text-white uppercase tracking-wider">
+              Éditer
+            </span>
           </button>
 
           <button

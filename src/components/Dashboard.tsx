@@ -1,7 +1,7 @@
 import React from 'react';
 import { TabId } from './Sidebar';
 import { MediaItem } from '../types';
-import { Database, Server, Film, Radio, Tv, ArrowRight, ShieldCheck, Zap, Layers } from 'lucide-react';
+import { Database, Server, Film, Radio, Tv, ArrowRight, ShieldCheck, Zap, Layers, FolderKanban } from 'lucide-react';
 
 interface DashboardProps {
   isXcConfigured: boolean;
@@ -57,6 +57,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             <Film className="w-4 h-4" />
             <span>Catalogue Unifié</span>
+          </button>
+          <button
+            onClick={() => onNavigate('media-manager')}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 text-xs font-semibold transition active:scale-[0.98]"
+          >
+            <FolderKanban className="w-4 h-4 text-sky-400" />
+            <span>Gestion des Médias</span>
           </button>
           <button
             onClick={onOpenNetflix}

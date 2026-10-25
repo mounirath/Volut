@@ -16,7 +16,8 @@ import {
   ShieldCheck,
   ArrowRight,
   Filter,
-  Link
+  Link,
+  ListVideo
 } from 'lucide-react';
 
 interface IptvSectionProps {
@@ -28,6 +29,7 @@ interface IptvSectionProps {
   isRefreshing: boolean;
   onLoadDemoConfig: () => void;
   onOpenM3uModal: () => void;
+  onOpenPlaylistModal?: () => void;
 }
 
 type IptvTab = 'live' | 'vod' | 'series';
@@ -41,6 +43,7 @@ export const IptvSection: React.FC<IptvSectionProps> = ({
   isRefreshing,
   onLoadDemoConfig,
   onOpenM3uModal,
+  onOpenPlaylistModal,
 }) => {
   const [activeIptvTab, setActiveIptvTab] = useState<IptvTab>('live');
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>('all');
@@ -150,8 +153,18 @@ export const IptvSection: React.FC<IptvSectionProps> = ({
               className="px-3.5 py-2 bg-gradient-to-r from-red-600 to-sky-600 hover:from-red-500 hover:to-sky-500 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md shadow-sky-900/30 active:scale-[0.98]"
             >
               <Link className="w-3.5 h-3.5" />
-              <span>Gérer URL & Listes M3U</span>
+              <span>URL & M3U</span>
             </button>
+
+            {onOpenPlaylistModal && (
+              <button
+                onClick={onOpenPlaylistModal}
+                className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 active:scale-[0.98]"
+              >
+                <ListVideo className="w-3.5 h-3.5 text-purple-400" />
+                <span>Mes Playlists</span>
+              </button>
+            )}
 
             <button
               onClick={onRefresh}

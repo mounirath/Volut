@@ -19,7 +19,9 @@ import {
   RefreshCw,
   ExternalLink,
   ShieldCheck,
-  Link
+  Link,
+  FolderKanban,
+  ListVideo
 } from 'lucide-react';
 
 interface BackendDrawerProps {
@@ -35,6 +37,7 @@ interface BackendDrawerProps {
   onRefreshStreams: () => void;
   isRefreshing: boolean;
   onOpenM3uModal?: () => void;
+  onOpenPlaylistModal?: () => void;
 }
 
 export const BackendDrawer: React.FC<BackendDrawerProps> = ({
@@ -50,6 +53,7 @@ export const BackendDrawer: React.FC<BackendDrawerProps> = ({
   onRefreshStreams,
   isRefreshing,
   onOpenM3uModal,
+  onOpenPlaylistModal,
 }) => {
   if (!isOpen) return null;
 
@@ -302,6 +306,21 @@ export const BackendDrawer: React.FC<BackendDrawerProps> = ({
 
               <button
                 onClick={() => {
+                  onSelectTab('media-manager');
+                  onClose();
+                }}
+                className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition ${
+                  activeTab === 'media-manager'
+                    ? 'bg-sky-500/20 border-sky-400/40 text-sky-300 font-semibold'
+                    : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <FolderKanban className="w-3.5 h-3.5 text-sky-400" />
+                <span>Gestion Médias</span>
+              </button>
+
+              <button
+                onClick={() => {
                   onSelectTab('xtreme-config');
                   onClose();
                 }}
@@ -316,18 +335,33 @@ export const BackendDrawer: React.FC<BackendDrawerProps> = ({
               </button>
             </div>
 
-            {onOpenM3uModal && (
-              <button
-                onClick={() => {
-                  onOpenM3uModal();
-                  onClose();
-                }}
-                className="w-full mt-2 p-2.5 rounded-xl bg-gradient-to-r from-red-600/20 via-sky-600/20 to-purple-600/20 hover:from-red-600/30 hover:to-sky-600/30 border border-sky-500/40 text-white font-semibold flex items-center justify-center gap-2 transition active:scale-[0.98]"
-              >
-                <Link className="w-3.5 h-3.5 text-sky-400" />
-                <span>Gérer les Listes & URLs M3U</span>
-              </button>
-            )}
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {onOpenM3uModal && (
+                <button
+                  onClick={() => {
+                    onOpenM3uModal();
+                    onClose();
+                  }}
+                  className="p-2.5 rounded-xl bg-gradient-to-r from-red-600/20 to-sky-600/20 hover:from-red-600/30 hover:to-sky-600/30 border border-sky-500/40 text-white font-semibold flex items-center justify-center gap-1.5 transition active:scale-[0.98] text-[11px]"
+                >
+                  <Link className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Importer M3U</span>
+                </button>
+              )}
+
+              {onOpenPlaylistModal && (
+                <button
+                  onClick={() => {
+                    onOpenPlaylistModal();
+                    onClose();
+                  }}
+                  className="p-2.5 rounded-xl bg-gradient-to-r from-purple-600/20 to-sky-600/20 hover:from-purple-600/30 hover:to-sky-600/30 border border-purple-500/40 text-white font-semibold flex items-center justify-center gap-1.5 transition active:scale-[0.98] text-[11px]"
+                >
+                  <ListVideo className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Gestion Listes</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

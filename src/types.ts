@@ -22,6 +22,20 @@ export interface MediaItem {
   epgNext?: string;
   seasonsCount?: number;
   episodesCount?: number;
+  isFavorite?: boolean;
+  enabled?: boolean;
+  customNote?: string;
+}
+
+export interface SavedPlaylist {
+  id: string;
+  name: string;
+  type: 'm3u' | 'xtreme' | 'custom';
+  url?: string;
+  itemCount: number;
+  createdAt: string;
+  isActive: boolean;
+  items: MediaItem[];
 }
 
 export interface XtremeConfig {
